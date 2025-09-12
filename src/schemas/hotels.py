@@ -9,6 +9,11 @@ class PaginationHotels(BaseModel):
     page: Annotated[int | None, Query(description="номер страницы")] = 1
     per_page: Annotated[int | None, Query(description="Элементов на странице")] = 5
     
+    
+class HotelSchema(BaseModel):
+    title: str
+    location: str
+    
 
 
 PiganHotelDep = Annotated[PaginationHotels, Depends()]

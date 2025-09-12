@@ -3,11 +3,11 @@ from typing import Annotated
 
 from fastapi import FastAPI, Query
 import uvicorn
-from sqlalchemy import select, Result
 from models.hotels import Hotels
 
-from schemas.hotels import PiganHotelDep
+from schemas.hotels import PiganHotelDep, HotelSchema
 from core.db.base_model import async_session_maker
+from repositories.hotel_repository import HoterRepository
 
 
 app = FastAPI()
@@ -16,23 +16,32 @@ app = FastAPI()
 @app.get("/hotels")
 async def get_hotels(
     pig_hotels: PiganHotelDep,
-    location: Annotated[str | None, Query(description="город где находится отель")] = None,
+    location: Annotated[
+        str | None, Query(description="город где находится отель")
+    ] = None,
     title: Annotated[str | None, Query(description="Название отеля")] = None,
 ):
-    query = select(Hotels)
-    if title:
-        query = query.where(Hotels.title.like(f"%{title}%"))
-    if location:
-        query = query.where(Hotels.location.like(f"%{location}%"))
-    query = (
-        query
-        .limit(pig_hotels.per_page)
-        .offset((pig_hotels.page-1) * pig_hotels.per_page)
-    )
     async with async_session_maker() as session:
-        result: Result =  await session.execute(query)
-        
-    return result.scalars().all()
+        hotels: list[Hotels] = await HoterRepository(
+            model=HoterRepository, session=session
+        ).get_all(
+            location=location,
+            title=title,
+            page=pig_hotels.page,
+            per_page=pig_hotels.per_page,
+        )
+
+    return hotels
+
+
+@app.post("/hotels")
+async def create_hotel(hotel_data: HotelSchema) -> str:
+    async with async_session_maker() as session:
+        hotel: Hotels = await HoterRepository(session=session, model=Hotels).add(
+            data=hotel_data
+        )
+
+    return {"status": "OK", "data": hotel}
 
 
 # @app.put("/hotels/{hotel_id}")
