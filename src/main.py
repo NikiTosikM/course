@@ -5,9 +5,10 @@ from fastapi import FastAPI, Query, Body
 import uvicorn
 from models.hotels import Hotels
 
-from schemas.hotels import PiganHotelDep, HotelSchema
 from core.db.base_model import async_session_maker
+from models.hotels import Hotels
 from repositories.hotel_repository import HoterRepository
+from schemas.hotels import HotelSchema, PiganHotelDep, HotelResponceSchema
 
 
 app = FastAPI()
@@ -35,11 +36,14 @@ async def get_hotels(
 
 
 @app.post("/hotels")
-async def create_hotel(hotel_data: HotelSchema) -> str:
+async def create_hotel(hotel_data: HotelSchema) -> dict:
     async with async_session_maker() as session:
-        hotel: Hotels = await HoterRepository(session=session, model=Hotels).add(
+        hotel_model: Hotels = await HoterRepository(session=session, model=Hotels).add(
             data=hotel_data
         )
+        await session.commit()
+        
+    hotel = HotelResponceSchema.model_validate(hotel_model)
 
     return {"status": "OK", "data": hotel}
 

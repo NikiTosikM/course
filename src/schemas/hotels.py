@@ -14,6 +14,14 @@ class HotelSchema(BaseModel):
     title: str
     location: str
     
+class HotelResponceSchema(BaseModel):
+    id: int
+    title: str
+    location: str
+    
+    class Config:
+        from_attributes = True 
+    
 
 
 PiganHotelDep = Annotated[PaginationHotels, Depends()]
