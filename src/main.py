@@ -1,7 +1,7 @@
 from typing import Annotated
 
 
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, Body
 import uvicorn
 from models.hotels import Hotels
 
@@ -44,9 +44,23 @@ async def create_hotel(hotel_data: HotelSchema) -> str:
     return {"status": "OK", "data": hotel}
 
 
-# @app.put("/hotels/{hotel_id}")
-# def update_hotel(hotel_id: int, title: str = Body(), name: str = Body()):
-#     hotels[hotel_id - 1] = {"id": hotel_id, "title": title, "name": name}
+@app.put("/hotels/{hotel_id}")
+async def update_hotel(hotel_id: int, hotel_data: HotelSchema):
+    async with async_session_maker() as session:
+        await HoterRepository(session=session, model=Hotels).update(
+            data=hotel_data,
+            id=hotel_id
+        )
+        await session.commit()
+        
+        
+@app.delete("/hotels/{hotel_id}")
+async def delete_hotel(hotel_id: int):
+    async with async_session_maker() as session:
+        await HoterRepository(session=session, model=Hotels).delete(
+            id=hotel_id
+        )
+        await session.commit()
 
 
 # @app.patch("/hotels/{hotel_id}")
