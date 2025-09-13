@@ -14,6 +14,10 @@ class HotelSchema(BaseModel):
     title: str
     location: str
     
+class HotelPartialUpdateSchema(BaseModel):
+    title: str | None = None
+    location: str | None = None
+    
 class HotelResponceSchema(BaseModel):
     id: int
     title: str
