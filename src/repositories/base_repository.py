@@ -66,7 +66,6 @@ class BaseRepository(Generic[Model]):
         self.validate_input_data(obj_model=model)
 
     def validate_input_data(self, obj_model: ValidateDatas):
-        print(obj_model, flush=True)
         if not obj_model or len(obj_model) > 1:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -80,3 +79,13 @@ class BaseRepository(Generic[Model]):
         result = await self.session.execute(query)
         
         return result.scalar_one_or_none()
+    
+    async def existence_object(self, **filter_by) -> bool:
+        query = (
+            select(self.model)
+            .filter_by(**filter_by)
+        )
+        result: Result = await self.session.execute(query)
+        model: Model = result.scalar_one_or_none()
+        
+        return True if model else None
