@@ -16,6 +16,12 @@ class DBConfig(BaseModel):
     @property
     def get_db_url(self):
         return f"postgresql+asyncpg://{self.user}:{self.password}@{self.host}:{self.port}/{self.db_name}"
+    
+
+class TokenConfig(BaseModel):
+    secret_key: str
+    algorithm: str
+    access_token_expire_minutes: int
 
 
 class Settings(BaseSettings):
@@ -28,6 +34,7 @@ class Settings(BaseSettings):
     )
     
     db: DBConfig
+    token: TokenConfig
     
     
 settings = Settings()

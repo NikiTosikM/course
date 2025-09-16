@@ -1,35 +1,29 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Response, Request
 
 from passlib.context import CryptContext
 
-from schemas.user import UserRequestSchema, UserResponceSchema, UserDBSchema
+from schemas.user import (
+    UserRequestSchema,
+    UserResponceSchema,
+    UserDBSchema,
+    UserLoginSchema,
+)
 from models.user import User
 from core.db.base_model import async_session_maker
 from repositories.user_repository import UserRepository
+from service.auth.auth_service import auth_service
 
 
 router = APIRouter(prefix="/auth", tags=["Authenticated and authorization"])
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-
-@router.put("/register", response_model=UserResponceSchema)
+@router.post("/register", response_model=UserResponceSchema)
 async def register(user_data: UserRequestSchema):
-    hash_password: str = pwd_context.hash(user_data.password)
+    hash_password: str = auth_service.create_hastpassword(password=user_data.password)
     user_data_for_db = UserDBSchema(
         name=user_data.name, email=user_data.email, hashpassword=hash_password
     )
     async with async_session_maker() as session:
-        availability_user: bool = await UserRepository(
-            session=session, model=User
-        ).existence_object(email=user_data.email)
-        if availability_user:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail={
-                    "message": "User is already registered"
-                }
-            )
         created_user: User = await UserRepository(session=session, model=User).add(
             data=user_data_for_db
         )
@@ -37,3 +31,32 @@ async def register(user_data: UserRequestSchema):
         await session.commit()
 
     return returned_data
+
+
+@router.post("/login")
+async def login(login_data: UserLoginSchema, responce: Response):
+    async with async_session_maker() as session:
+        user: User | None = await UserRepository(
+            session=session, model=User
+        ).get_one_or_none(email=login_data.email)
+        await session.commit()
+    verify_hashpassword: bool = auth_service.verify_password(
+        password=login_data.password, hashpassword=user.hashpassword
+    ) if user else None
+    if not user or not verify_hashpassword:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"message": "Account login details are incorrect"},
+        )
+        
+    access_token: str =auth_service.create_access_token(user_id=user.id)
+    responce.set_cookie(key="access_token", value=access_token)
+        
+    return {"access_token": access_token}
+
+
+@router.get("/only-auth")
+def only_auth(request: Request):
+    access_token = request.cookies.get("access_token", None)
+    
+    return access_token
