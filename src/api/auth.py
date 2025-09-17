@@ -1,6 +1,4 @@
-from fastapi import APIRouter, HTTPException, status, Response, Request
-
-from passlib.context import CryptContext
+from fastapi import APIRouter, HTTPException, status, Response
 
 from schemas.user import (
     UserRequestSchema,
@@ -12,6 +10,7 @@ from models.user import User
 from core.db.base_model import async_session_maker
 from repositories.user_repository import UserRepository
 from service.auth.auth_service import auth_service
+from api.dependencies import UserIdDepen, LogoutDepen
 
 
 router = APIRouter(prefix="/auth", tags=["Authenticated and authorization"])
@@ -55,8 +54,14 @@ async def login(login_data: UserLoginSchema, responce: Response):
     return {"access_token": access_token}
 
 
-@router.get("/only-auth")
-def only_auth(request: Request):
-    access_token = request.cookies.get("access_token", None)
+@router.get("/me")
+async def about_me(user_id: UserIdDepen): # type: ignore
+    async with async_session_maker() as session:
+        user = await UserRepository(session=session, model=User).get_one_or_none(id=user_id)
+        await session.commit()
     
-    return access_token
+    return user
+
+@router.post("/logout")
+async def logout(token: LogoutDepen):
+    return {"status": "ok"}
