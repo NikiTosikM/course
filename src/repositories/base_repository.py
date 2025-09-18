@@ -18,7 +18,7 @@ class BaseRepository(Generic[Model]):
         self,
         session: AsyncSession,
         model: type[Model],
-        schema: type[Schema] | None = None,
+        schema: type[Schema],
     ):
         self.session = session
         self.model = model
@@ -36,11 +36,11 @@ class BaseRepository(Generic[Model]):
 
         return result.scalar_one_or_none()
 
-    async def add(self, data: Schema) -> Model:
+    async def add(self, data: Schema) -> Schema:
         stmt = insert(self.model).values(**data.model_dump()).returning(self.model)
         result: Result = await self.session.execute(stmt)
-
-        return result.scalar_one()
+        model = result.scalar_one()
+        return self.schema.model_validate(model)
 
     async def update(
         self, data: Schema, exclude_unset: bool = False, **filter_by

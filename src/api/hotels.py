@@ -12,7 +12,8 @@ from schemas.hotels import (
 )
 
 
-router =  APIRouter(tags=["Работа с отелями"])
+router = APIRouter(tags=["Работа с отелями"])
+
 
 @router.get("/hotels")
 async def get_hotels(
@@ -38,12 +39,10 @@ async def get_hotels(
 @router.post("/hotels")
 async def create_hotel(hotel_data: HotelSchema) -> dict:
     async with async_session_maker() as session:
-        hotel_model: Hotels = await HoterRepository(session=session, model=Hotels).add(
-            data=hotel_data
-        )
+        hotel: HotelResponceSchema = await HoterRepository(
+            session=session, model=Hotels
+        ).add(data=hotel_data)
         await session.commit()
-
-    hotel = HotelResponceSchema.model_validate(hotel_model)
 
     return {"status": "OK", "data": hotel}
 
@@ -84,5 +83,5 @@ async def get_hotel(hotel_id: int):
             hotel_id=hotel_id
         )
         await session.commit()
-        
+
     return {"status": "ok", "hotel": hotel}

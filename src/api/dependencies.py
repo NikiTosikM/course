@@ -15,18 +15,8 @@ def get_token_from_cookie(request: Request):
     return access_token
 
 
-def valide_delete_token(responce: Response, token: str = Depends(get_token_from_cookie)):
-    try:
-        user_data: dict = auth_service.decode_token(token=token)
-        responce.delete_cookie(key="access_token")
-    except jwt.exceptions.DecodeError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Token is not valid"
-        )
-    except jwt.exceptions.ExpiredSignatureError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Signature has expired"
-        )
+def valide_delete_token(responce: Response):
+    responce.delete_cookie(key="access_token")
 
 
 def get_current_user_id(token: str = Depends(get_token_from_cookie)):
