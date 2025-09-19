@@ -30,7 +30,7 @@ class BaseRepository(Generic[Model]):
 
         return result.scalars().all()
 
-    async def get_one_or_none(self, **filter_by) -> Model:
+    async def get_one_or_none(self, **filter_by) -> Model | None:
         query = select(self.model).filter_by(**filter_by)
         result: Result = await self.session.execute(query)
 
@@ -55,10 +55,10 @@ class BaseRepository(Generic[Model]):
         model: Model = result.scalars().all()
         self.validate_input_data(obj_model=model)
 
-    async def delete(self, **filter_by) -> None:
+    async def delete(self, **filters) -> None:
         stmt = (
             delete(self.model)
-            .where(self.model.id == filter_by["id"])
+            .filter_by(**filters)
             .returning(self.model)
         )
         result = await self.session.execute(stmt)

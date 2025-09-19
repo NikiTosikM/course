@@ -21,4 +21,5 @@ class RoomRepository(BaseRepository[Rooms]):
         models = result.scalars().all()
         
         return [self.schema.model_validate(model) for model in models]
+        
     

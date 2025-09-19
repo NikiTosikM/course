@@ -4,7 +4,7 @@ from schemas.rooms import (
     RoomHotelSchema,
     ResponceRoomHotelSchema,
     UpdateRoomHotelSchema,
-    RoomHotelPartialUpdateSchema
+    RoomHotelPartialUpdateSchema,
 )
 from core.db.base_model import async_session_maker
 from repositories.room_repository import RoomRepository
@@ -22,6 +22,17 @@ async def get_all_rooms(hotel_id: int):
         ).get_rooms_by_hotel(hotel_id=hotel_id)
 
     return rooms
+
+
+@router.get("/hotels/{hotel_id}/rooms/{room_id}")
+async def get_room(hotel_id: int, room_id: int):
+    async with async_session_maker() as session:
+        room: Rooms | None = await RoomRepository(session=session, model=Rooms).get_one_or_none(
+            hotel_id=hotel_id, id=room_id
+        )
+        
+    return room
+    
 
 
 @router.post("/{hotel_id}")
@@ -55,7 +66,20 @@ async def change_room(
     async with async_session_maker() as session:
         await RoomRepository(
             session=session, model=Rooms, schema=RoomHotelPartialUpdateSchema
-        ).update(data=update_data_room, exclude_unset=True, hotel_id=hotel_id, id=room_id)
+        ).update(
+            data=update_data_room, exclude_unset=True, hotel_id=hotel_id, id=room_id
+        )
+        await session.commit()
+
+    return {"status": "ok"}
+
+
+@router.delete("/hotels/{hotel_id}/rooms/{room_id}")
+async def delete_room(hotel_id: int, room_id: int):
+    async with async_session_maker() as session:
+        await RoomRepository(session=session, model=Rooms).delete(
+            id=room_id, hotel_id=hotel_id
+        )
         await session.commit()
 
     return {"status": "ok"}
