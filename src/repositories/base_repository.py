@@ -32,7 +32,7 @@ class BaseRepository(Generic[Model]):
         return result.scalars().all()
 
     async def get_all(self) -> list[Model]:
-        return self.get_filtered()
+        return await self.get_filtered()
 
     async def get_one_or_none(self, **filter_by) -> Model | None:
         query = select(self.model).filter_by(**filter_by)

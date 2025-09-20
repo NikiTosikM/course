@@ -12,7 +12,7 @@ class RoomRepository(BaseRepository[Rooms]):
     async def add(self, data: RoomHotelSchema, **values) -> ResponceRoomHotelSchema:
         stmt = insert(self.model).values(**data.model_dump(), **values).returning(self.model)
         result: Result = await self.session.execute(stmt)
-        model = result.scalar_one()
-        return self.schema.model_validate(model)
+        
+        return result.scalar_one()
         
     
