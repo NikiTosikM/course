@@ -8,6 +8,7 @@ from core.config import settings
 from models.rooms import Rooms
 from models.hotels import Hotels
 from models.user import User
+from models.bookings import Booking
 from alembic import context
 
 # this is the Alembic Config object, which provides

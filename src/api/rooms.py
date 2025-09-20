@@ -6,80 +6,64 @@ from schemas.rooms import (
     UpdateRoomHotelSchema,
     RoomHotelPartialUpdateSchema,
 )
-from core.db.base_model import async_session_maker
-from repositories.room_repository import RoomRepository
 from models.rooms import Rooms
+from api.dependencies import DB_Dep
 
 
 router = APIRouter(prefix="/hotels", tags=["Rooms"])
 
 
-@router.get("/{hotel_id}")
-async def get_all_rooms(hotel_id: int):
-    async with async_session_maker() as session:
-        rooms: list[ResponceRoomHotelSchema] = await RoomRepository(
-            session=session, model=Rooms, schema=ResponceRoomHotelSchema
-        ).get_rooms_by_hotel(hotel_id=hotel_id)
+@router.get("/{hotel_id}/rooms")
+async def get_all_rooms(hotel_id: int, db_manager: DB_Dep):
+    rooms: list[Rooms] = await db_manager.room.get_filtered(
+        hotel_id=hotel_id
+    )
 
     return rooms
 
 
-@router.get("/hotels/{hotel_id}/rooms/{room_id}")
-async def get_room(hotel_id: int, room_id: int):
-    async with async_session_maker() as session:
-        room: Rooms | None = await RoomRepository(session=session, model=Rooms).get_one_or_none(
-            hotel_id=hotel_id, id=room_id
-        )
-        
+@router.get("/{hotel_id}/rooms/{room_id}")
+async def get_room(db_manager: DB_Dep, hotel_id: int, room_id: int):
+    room: Rooms | None = await db_manager.room.get_one_or_none(hotel_id=hotel_id, id=room_id)
+
     return room
-    
 
 
 @router.post("/{hotel_id}")
-async def create_room(hotel_id: int, room: RoomHotelSchema):
-    async with async_session_maker() as session:
-        room_data: ResponceRoomHotelSchema = await RoomRepository(
-            session=session, model=Rooms, schema=RoomHotelSchema
-        ).add(data=room, hotel_id=hotel_id)
-        await session.commit()
+async def create_room(db_manager: DB_Dep, hotel_id: int, room: RoomHotelSchema):
+    room_data: ResponceRoomHotelSchema = await db_manager.room.add(data=room, hotel_id=hotel_id)
+    await db_manager.commit()
 
     return room_data
 
 
 @router.put("/{hotel_id}/rooms/{room_id}")
 async def update_room(
-    hotel_id: int, room_id: int, update_data_room: UpdateRoomHotelSchema
+    db_manager: DB_Dep, hotel_id: int, room_id: int, update_data_room: UpdateRoomHotelSchema
 ):
-    async with async_session_maker() as session:
-        await RoomRepository(
-            session=session, model=Rooms, schema=UpdateRoomHotelSchema
-        ).update(data=update_data_room, hotel_id=hotel_id, id=room_id)
-        await session.commit()
+    await db_manager.room.update(data=update_data_room, hotel_id=hotel_id, id=room_id)
+    await db_manager.commit()
 
     return {"status": "ok"}
 
 
 @router.patch("/{hotel_id}/rooms/{room_id}")
 async def change_room(
-    hotel_id: int, room_id: int, update_data_room: RoomHotelPartialUpdateSchema
+    db_manager: DB_Dep, hotel_id: int, room_id: int, update_data_room: RoomHotelPartialUpdateSchema
 ):
-    async with async_session_maker() as session:
-        await RoomRepository(
-            session=session, model=Rooms, schema=RoomHotelPartialUpdateSchema
-        ).update(
+    await db_manager.room.update(
             data=update_data_room, exclude_unset=True, hotel_id=hotel_id, id=room_id
         )
-        await session.commit()
+    await db_manager.commit()
 
     return {"status": "ok"}
 
 
-@router.delete("/hotels/{hotel_id}/rooms/{room_id}")
-async def delete_room(hotel_id: int, room_id: int):
-    async with async_session_maker() as session:
-        await RoomRepository(session=session, model=Rooms).delete(
+@router.delete("/{hotel_id}/rooms/{room_id}")
+async def delete_room(db_manager: DB_Dep, hotel_id: int, room_id: int):
+    await db_manager.room.delete(
             id=room_id, hotel_id=hotel_id
         )
-        await session.commit()
+    await db_manager.commit()
 
     return {"status": "ok"}

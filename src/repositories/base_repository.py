@@ -18,17 +18,21 @@ class BaseRepository(Generic[Model]):
         self,
         session: AsyncSession,
         model: type[Model],
-        schema: type[Schema],
+        schema: type[Schema] = None,
     ):
         self.session = session
         self.model = model
         self.schema = schema
 
-    async def get_all(self) -> list[Model]:
-        query = select(self.model)
+
+    async def get_filtered(self, **filters) -> list[Model]:
+        query = select(self.model).filter_by(**filters)
         result: Result = await self.session.execute(query)
 
         return result.scalars().all()
+
+    async def get_all(self) -> list[Model]:
+        return self.get_filtered()
 
     async def get_one_or_none(self, **filter_by) -> Model | None:
         query = select(self.model).filter_by(**filter_by)
@@ -39,8 +43,9 @@ class BaseRepository(Generic[Model]):
     async def add(self, data: Schema) -> Schema:
         stmt = insert(self.model).values(**data.model_dump()).returning(self.model)
         result: Result = await self.session.execute(stmt)
-        model = result.scalar_one()
-        return self.schema.model_validate(model)
+        
+        return result.scalar_one()
+
 
     async def update(
         self, data: Schema, exclude_unset: bool = False, **filter_by

@@ -4,6 +4,8 @@ from fastapi import Depends, Request, HTTPException, status, Response
 import jwt
 
 from service.auth.auth_service import auth_service
+from utils.db.db_manager import DBManager
+from core.db.base_model import async_session_maker
 
 
 def get_token_from_cookie(request: Request):
@@ -17,6 +19,8 @@ def get_token_from_cookie(request: Request):
 
 def valide_delete_token(responce: Response):
     responce.delete_cookie(key="access_token")
+    
+LogoutDepen = Annotated[None, Depends(valide_delete_token)]
 
 
 def get_current_user_id(token: str = Depends(get_token_from_cookie)):
@@ -38,4 +42,10 @@ def get_current_user_id(token: str = Depends(get_token_from_cookie)):
         )
 
 UserIdDepen =  Annotated[int, Depends(get_current_user_id)]
-LogoutDepen = Annotated[None, Depends(valide_delete_token)]
+
+
+async def get_db_manager():
+    async with DBManager(session_factory=async_session_maker) as db_manager:
+        yield db_manager
+        
+DB_Dep = Annotated[DBManager, Depends(get_db_manager)]
