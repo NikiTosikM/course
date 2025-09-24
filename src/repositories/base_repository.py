@@ -14,22 +14,24 @@ ValidateDatas = TypeVar("ValidateDatas", Model, None, list[Model])
 
 
 class BaseRepository(Generic[Model]):
+    model: Model
+    schema: Schema
+    
     def __init__(
         self,
         session: AsyncSession,
-        model: type[Model],
-        schema: type[Schema] = None,
     ):
         self.session = session
-        self.model = model
-        self.schema = schema
 
 
-    async def get_filtered(self, **filters) -> list[Model]:
-        query = select(self.model).filter_by(**filters)
+    async def get_filtered(self, *expressions, **filters) -> list[Model]:
+        query = (
+            select(self.model)
+            .filter(*expressions)
+            .filter_by(**filters)
+        )
         result: Result = await self.session.execute(query)
-
-        return result.scalars().all()
+        return [self.schema.model_validate(model) for model in result.scalars().all()]
 
     async def get_all(self) -> list[Model]:
         return await self.get_filtered()

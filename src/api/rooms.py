@@ -1,4 +1,7 @@
-from fastapi import APIRouter
+from typing import Annotated
+from datetime import date
+
+from fastapi import APIRouter, Query
 
 from schemas.rooms import (
     RoomHotelSchema,
@@ -14,8 +17,15 @@ router = APIRouter(prefix="/hotels", tags=["Rooms"])
 
 
 @router.get("/{hotel_id}/rooms")
-async def get_all_rooms(hotel_id: int, db_manager: DB_Dep):
-    rooms: list[Rooms] = await db_manager.room.get_filtered(
+async def get_all_rooms(
+    hotel_id: int, 
+    db_manager: DB_Dep,
+    data_from: Annotated[date, Query(description="Дата заезда в номер", example="2025-09-10")],
+    data_to: Annotated[date, Query(description="Дата выезда из номера", example="2025-09-15")]
+):
+    rooms: list[Rooms] = await db_manager.room.get_all(
+        date_from=data_from,
+        date_to=data_to,
         hotel_id=hotel_id
     )
 

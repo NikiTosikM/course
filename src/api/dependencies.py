@@ -1,7 +1,8 @@
 from typing import Annotated
 
-from fastapi import Depends, Request, HTTPException, status, Response
+from fastapi import Depends, Request, HTTPException, status, Response, Query
 import jwt
+from pydantic import BaseModel
 
 from service.auth.auth_service import auth_service
 from utils.db.db_manager import DBManager
@@ -19,21 +20,20 @@ def get_token_from_cookie(request: Request):
 
 def valide_delete_token(responce: Response):
     responce.delete_cookie(key="access_token")
-    
+
+
 LogoutDepen = Annotated[None, Depends(valide_delete_token)]
 
 
 def get_current_user_id(token: str = Depends(get_token_from_cookie)):
     try:
         user_data: dict = auth_service.decode_token(token=token)
-        
+
         user_id = user_data.get("user_id")
         if not user_id:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail={
-                    "detail": "Token is not valid"
-                }
+                detail={"detail": "Token is not valid"},
             )
         return user_id
     except jwt.exceptions.DecodeError:
@@ -41,11 +41,15 @@ def get_current_user_id(token: str = Depends(get_token_from_cookie)):
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Token is not valid"
         )
 
-UserIdDepen =  Annotated[int, Depends(get_current_user_id)]
+
+UserIdDepen = Annotated[int, Depends(get_current_user_id)]
 
 
 async def get_db_manager():
     async with DBManager(session_factory=async_session_maker) as db_manager:
         yield db_manager
-        
+
+
 DB_Dep = Annotated[DBManager, Depends(get_db_manager)]
+
+

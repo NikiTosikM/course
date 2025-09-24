@@ -13,18 +13,18 @@ class DBManager:
     async def __aenter__(self):
         self.session = self.session_factory()
 
-        self.user = UserRepository(session=self.session, model=User)
-        self.room = RoomRepository(session=self.session, model=Rooms)
-        self.hotel = HoterRepository(session=self.session, model=Hotels)
+        self.user = UserRepository(session=self.session)
+        self.room = RoomRepository(session=self.session)
+        self.hotel = HoterRepository(session=self.session)
         self.booking = BookingRepository(
-            session=self.session, model=Booking, schema=DBResponceBookingSchema
+            session=self.session
         )
 
         return self
 
     async def __aexit__(self, *args):
-        self.session.rollback()
-        self.session.close()
+        await self.session.rollback()
+        await self.session.close()
 
     async def commit(self):
         await self.session.commit()

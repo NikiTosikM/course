@@ -1,22 +1,46 @@
+from datetime import date
+
 from sqlalchemy import select, Result
 
 from repositories.base_repository import BaseRepository
-from models.hotels import Hotels
+from models import Hotels, Rooms
+from repositories.db_expressions import getting_available_rooms
+from schemas import HotelResponceSchema, PaginationHotels
 
 
 class HoterRepository(BaseRepository[Hotels]):
-    def __init__(self, session, model):
-        super().__init__(session, model)
+    model = Hotels
+    schema = HotelResponceSchema
 
-    async def get_all(
-        self, location: str, title: str, page: int, per_page: int
+    def __init__(self, session):
+        super().__init__(session)
+
+    async def get_filtered(
+        self,
+        date_from: date,
+        date_to: date,
+        pig_hotels: PaginationHotels,
+        location: str | None,
+        title: str | None,
     ) -> list[Hotels] | None:
-        query = select(Hotels)
-        if title:
-            query = query.where(Hotels.title.ilike(f"%{title}%"))
-        if location:
-            query = query.where(Hotels.location.ilike(f"%{location}%"))
-        query = query.limit(per_page).offset((page - 1) * per_page)
-        result: Result = await self.session.execute(query)
+        result: Result = await self.session.execute(
+            getting_available_rooms(date_from=date_from, date_to=date_to)
+        )
+        ids_all_available_rooms: list[int] = result.scalars().all()
 
-        return result.scalars().all()
+        ids_available_hotels = select(Rooms.hotel_id).select_from(Rooms)
+        if location:
+            ids_available_hotels = ids_available_hotels.outerjoin(
+                Hotels, Rooms.hotel_id == Hotels.id
+            ).filter_by(location=location)
+        if title:
+            ids_available_hotels = ids_available_hotels.filter(
+                Hotels.title.ilike(f"%{title}%")
+            )
+        ids_available_hotels = (
+            ids_available_hotels.where(Rooms.id.in_(ids_all_available_rooms))
+            .limit(pig_hotels.per_page)
+            .offset((pig_hotels.page - 1) * 5)
+        )
+
+        return await self.get_filtered(Hotels.id.in_(ids_available_hotels))

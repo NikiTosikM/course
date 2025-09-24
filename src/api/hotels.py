@@ -1,12 +1,13 @@
 from typing import Annotated
+from datetime import date
 
 from fastapi import APIRouter, Query
 from api.dependencies import DB_Dep
 from schemas.hotels import (
     HotelSchema,
-    PiganHotelDep,
     HotelResponceSchema,
     HotelPartialUpdateSchema,
+    PiganHotelDep
 )
 
 
@@ -17,20 +18,20 @@ router = APIRouter(tags=["Работа с отелями"])
 async def get_hotels(
     db_manager: DB_Dep,
     pig_hotels: PiganHotelDep,
-    location: Annotated[
-        str | None, Query(description="город где находится отель")
-    ] = None,
-    title: Annotated[str | None, Query(description="Название отеля")] = None,
+    data_from: Annotated[date, Query(description="Дата заезда")] = "2025-09-10",
+    date_to: Annotated[date, Query(description="Дата выезда")] = "2025-09-15",
+    location: Annotated[str | None, Query(description="Локация")] = None,
+    title: Annotated[str | None, Query(description="Название отеля")] = None
 ):
-    hotels = await db_manager.hotel.get_all(
+    hotels = await db_manager.hotel.get_filtered(
+            date_to=date_to,
+            date_from=data_from,
             location=location,
             title=title,
-            page=pig_hotels.page,
-            per_page=pig_hotels.per_page,
+            pig_hotels=pig_hotels
         )
 
     return hotels
-
 
 @router.post("/hotels")
 async def create_hotel(db_manager: DB_Dep, hotel_data: HotelSchema) -> dict:

@@ -4,6 +4,8 @@ from schemas.bookings import DBBookingSchema
 
 
 class BookingRepository(BaseRepository):
-    def __init__(self, session, model, schema):
-        super().__init__(session, model, schema)
+    model = Booking
+    
+    def __init__(self, session):
+        super().__init__(session)
         
