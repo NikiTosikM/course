@@ -28,19 +28,26 @@ class HoterRepository(BaseRepository[Hotels]):
         )
         ids_all_available_rooms: list[int] = result.scalars().all()
 
-        ids_available_hotels = select(Rooms.hotel_id).select_from(Rooms)
+        ids_available_hotels = (
+            select(Rooms.hotel_id)
+            .select_from(Rooms)
+            .where(Rooms.id.in_(ids_all_available_rooms))
+        )
+        
+        query = (
+            select(Hotels)
+            .select_from(Hotels)
+            .where(Hotels.id.in_(ids_available_hotels))
+            .limit(pig_hotels.per_page)
+            .offset((pig_hotels.page -1) * pig_hotels.per_page)
+        )
         if location:
-            ids_available_hotels = ids_available_hotels.outerjoin(
-                Hotels, Rooms.hotel_id == Hotels.id
-            ).filter_by(location=location)
+            query = query.filter_by(location=location)
         if title:
-            ids_available_hotels = ids_available_hotels.filter(
+            query = query.filter(
                 Hotels.title.ilike(f"%{title}%")
             )
-        ids_available_hotels = (
-            ids_available_hotels.where(Rooms.id.in_(ids_all_available_rooms))
-            .limit(pig_hotels.per_page)
-            .offset((pig_hotels.page - 1) * 5)
-        )
+        
+        result: Result = await self.session.execute(query)
 
-        return await self.get_filtered(Hotels.id.in_(ids_available_hotels))
+        return [self.schema.model_validate(model) for model in result.scalars().all()]
