@@ -2,7 +2,7 @@ from datetime import date
 
 from sqlalchemy import select, func
 from sqlalchemy.sql import Select
-from models import Rooms, Booking
+from models import Rooms, Booking, RoomFacilities
 
 
 def getting_available_rooms(
@@ -48,3 +48,4 @@ def getting_available_rooms(
     )
     
     return query
+

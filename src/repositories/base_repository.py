@@ -47,7 +47,10 @@ class BaseRepository(Generic[Model]):
         result: Result = await self.session.execute(stmt)
         
         return result.scalar_one()
-
+    
+    async def add_bulk(self, data: list[Schema]) -> Schema:
+        stmt = insert(self.model).values([item.model_dump() for item in data])
+        await self.session.execute(stmt)
 
     async def update(
         self, data: Schema, exclude_unset: bool = False, **filter_by

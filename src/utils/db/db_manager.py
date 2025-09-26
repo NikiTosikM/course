@@ -2,7 +2,7 @@ from repositories.hotel_repository import HoterRepository
 from repositories.room_repository import RoomRepository
 from repositories.user_repository import UserRepository
 from repositories.booking_repository import BookingRepository
-from repositories.facility_repository import FacilityRepository
+from repositories.facility_repository import FacilityRepository, RoomFacilitiesRepository
 from models import User, Rooms, Hotels, Booking
 from schemas import DBResponceBookingSchema
 
@@ -21,6 +21,7 @@ class DBManager:
             session=self.session
         )
         self.facility = FacilityRepository(session=self.session)
+        self.room_facility = RoomFacilitiesRepository(session=self.session)
 
         return self
 

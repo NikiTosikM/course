@@ -12,5 +12,12 @@ class FacilityResponceSchema(BaseModelSchema):
     title: str
     
     
+class RoomFacilityAddSchema(BaseModel):
+    room_id: int
+    facility_id: int
+    
+class RoomFacilityResponceSchema(RoomFacilityAddSchema):
+    id: int
+    
 
 

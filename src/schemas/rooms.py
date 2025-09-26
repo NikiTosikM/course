@@ -3,12 +3,19 @@ from core.schemas.base_schema import BaseModelSchema
 
 class RoomHotelSchema(BaseModelSchema):
     title: str
-    description: str | None
+    description: str | None = None
+    price: int
+    quantity: int
+    facilities_ids: list[int] = []
+    
+
+class RoomHotelAddSchema(BaseModelSchema):
+    title: str
+    description: str | None = None
     price: int
     quantity: int
     
-    
-class ResponceRoomHotelSchema(RoomHotelSchema):
+class ResponceRoomHotelSchema(RoomHotelSchema): 
     id: int
     hotel_id: int
     
