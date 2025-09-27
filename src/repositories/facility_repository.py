@@ -13,7 +13,7 @@ class FacilityRepository(BaseRepository[Facilities]):
 class RoomFacilitiesRepository(BaseRepository[RoomFacilities]):
     model = RoomFacilities
 
-    async def facilities_update(
+    async def update(
         self,
         necessary_ids_facilities: list[int],
         room_id: int,

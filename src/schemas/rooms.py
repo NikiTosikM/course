@@ -24,7 +24,14 @@ class UpdateRoomHotelSchema(RoomHotelSchema):
     hotel_id: int
     
 
-class RoomHotelPartialUpdateSchema(BaseModelSchema):
+class RequestRoomHotelPartialUpdateSchema(BaseModelSchema):
+    title: str | None = None
+    description: str | None = None
+    price: int | None = None
+    quantity: int | None = None
+    facilities_ids: list[int] = []
+    
+class RoomHotelParticalUpdateSchema(BaseModelSchema):
     title: str | None = None
     description: str | None = None
     price: int | None = None

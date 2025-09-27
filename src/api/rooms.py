@@ -7,7 +7,8 @@ from schemas.rooms import (
     RoomHotelSchema,
     ResponceRoomHotelSchema,
     UpdateRoomHotelSchema,
-    RoomHotelPartialUpdateSchema,
+    RequestRoomHotelPartialUpdateSchema,
+    RoomHotelParticalUpdateSchema,
     RoomHotelAddSchema,
 )
 from schemas.facility import RoomFacilityAddSchema
@@ -76,12 +77,11 @@ async def update_room(
 ):
     room_data = RoomHotelAddSchema(**update_data_room.model_dump())
     await db_manager.room.update(data=room_data, hotel_id=hotel_id, id=room_id)
-    
-    await db_manager.room_facility.facilities_update(
-        room_id=room_id,
-        necessary_ids_facilities=update_data_room.facilities_ids
+
+    await db_manager.room_facility.update(
+        room_id=room_id, necessary_ids_facilities=update_data_room.facilities_ids
     )
-    
+
     await db_manager.commit()
 
     return {"status": "ok"}
@@ -92,11 +92,19 @@ async def change_room(
     db_manager: DB_Dep,
     hotel_id: int,
     room_id: int,
-    update_data_room: RoomHotelPartialUpdateSchema,
+    update_data_room: RequestRoomHotelPartialUpdateSchema,
 ):
-    await db_manager.room.update(
-        data=update_data_room, exclude_unset=True, hotel_id=hotel_id, id=room_id
+    room_data = RoomHotelParticalUpdateSchema(
+        **update_data_room.model_dump(exclude_unset=True)
     )
+    await db_manager.room.update(
+        data=room_data, exclude_unset=True, hotel_id=hotel_id, id=room_id
+    )
+    if update_data_room.facilities_ids:
+        await db_manager.room_facility.update(
+            necessary_ids_facilities=update_data_room.facilities_ids, room_id=room_id
+        )
+
     await db_manager.commit()
 
     return {"status": "ok"}
