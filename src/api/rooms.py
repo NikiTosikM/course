@@ -97,9 +97,10 @@ async def change_room(
     room_data = RoomHotelParticalUpdateSchema(
         **update_data_room.model_dump(exclude_unset=True)
     )
-    await db_manager.room.update(
-        data=room_data, exclude_unset=True, hotel_id=hotel_id, id=room_id
-    )
+    if room_data:
+        await db_manager.room.update(
+            data=room_data, exclude_unset=True, hotel_id=hotel_id, id=room_id
+        )
     if update_data_room.facilities_ids:
         await db_manager.room_facility.update(
             necessary_ids_facilities=update_data_room.facilities_ids, room_id=room_id

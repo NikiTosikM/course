@@ -1,4 +1,5 @@
 from core.schemas.base_schema import BaseModelSchema
+from schemas.facility import  FacilityResponceSchema
 
 
 class RoomHotelSchema(BaseModelSchema):
@@ -15,9 +16,14 @@ class RoomHotelAddSchema(BaseModelSchema):
     price: int
     quantity: int
     
-class ResponceRoomHotelSchema(RoomHotelSchema): 
+class ResponceRoomHotelSchema(BaseModelSchema): 
     id: int
     hotel_id: int
+    title: str
+    description: str | None = None
+    price: int
+    quantity: int
+    facilities: list[FacilityResponceSchema]
     
 
 class UpdateRoomHotelSchema(RoomHotelSchema):

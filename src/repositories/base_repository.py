@@ -57,8 +57,8 @@ class BaseRepository(Generic[Model]):
     ) -> None:
         stmt = (
             update(self.model)
-            .filter_by(**filter_by)
             .values(**data.model_dump(exclude_unset=exclude_unset))
+            .filter_by(**filter_by)
             .returning(self.model)
         )
         result = await self.session.execute(stmt)

@@ -2,7 +2,6 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from core.db.base_model import Base
-from models import Facilities
 
 
 class Rooms(Base):
@@ -14,6 +13,9 @@ class Rooms(Base):
     description: Mapped[str | None]
     price: Mapped[int]
     quantity: Mapped[int]
-    facilities: Mapped[list["Facilities"]] = relationship(
+    facilities: Mapped[list["Facilities"]] = relationship(  # noqa: F821
         secondary="room_facilities", back_populates="rooms"
     )
+    
+    def __repr__(self):
+        return f"{self.__dict__}"

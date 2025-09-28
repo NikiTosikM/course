@@ -3,13 +3,12 @@ from pydantic import Field
 from core.schemas.base_schema import BaseModelSchema, BaseModel
 
 
-class FacilityRequestSchema(BaseModel):
+class FacilityRequestSchema(BaseModelSchema):
     title: str = Field(max_length=100)
     
 
-class FacilityResponceSchema(BaseModelSchema):
+class FacilityResponceSchema(FacilityRequestSchema):
     id: int
-    title: str
     
     
 class RoomFacilityAddSchema(BaseModel):
