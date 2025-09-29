@@ -38,9 +38,19 @@ async def get_all_rooms(
 
 
 @router.get("/{hotel_id}/rooms/{room_id}")
-async def get_room(db_manager: DB_Dep, hotel_id: int, room_id: int):
+async def get_room(
+    db_manager: DB_Dep,
+    data_from: Annotated[
+        date, Query(description="Дата заезда в номер", example="2025-09-10")
+    ],
+    data_to: Annotated[
+        date, Query(description="Дата выезда из номера", example="2025-09-15")
+    ],
+    hotel_id: int,
+    room_id: int,
+):
     room: Rooms | None = await db_manager.room.get_one_or_none(
-        hotel_id=hotel_id, id=room_id
+        date_from=data_from, date_to=data_to, hotel_id=hotel_id, room_id=room_id
     )
 
     return room
