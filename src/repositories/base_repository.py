@@ -6,15 +6,13 @@ from sqlalchemy import Result, delete, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.db.base_model import Base
+from repositories.mappers.base_mapper import DBModel, Schema
 
-Model = TypeVar("Model", bound=Base)
-Schema = TypeVar("Schema", bound=BaseModel)
-
-ValidateDatas = TypeVar("ValidateDatas", Model, None, list[Model])
+ValidateDatas = TypeVar("ValidateDatas", DBModel, None, list[DBModel])
 
 
-class BaseRepository(Generic[Model]):
-    model: Model
+class BaseRepository(Generic[DBModel]):
+    model: DBModel
     schema: Schema
     
     def __init__(
@@ -24,7 +22,7 @@ class BaseRepository(Generic[Model]):
         self.session = session
 
 
-    async def get_filtered(self, *expressions, **filters) -> list[Model]:
+    async def get_filtered(self, *expressions, **filters) -> list[DBModel]:
         query = (
             select(self.model)
             .filter(*expressions)
@@ -33,10 +31,10 @@ class BaseRepository(Generic[Model]):
         result: Result = await self.session.execute(query)
         return [self.schema.model_validate(model) for model in result.scalars().all()]
 
-    async def get_all(self) -> list[Model]:
+    async def get_all(self) -> list[DBModel]:
         return await self.get_filtered()
 
-    async def get_one_or_none(self, **filter_by) -> Model | None:
+    async def get_one_or_none(self, **filter_by) ->  DBModel | None:
         query = select(self.model).filter_by(**filter_by)
         result: Result = await self.session.execute(query)
 
@@ -63,7 +61,7 @@ class BaseRepository(Generic[Model]):
             .returning(self.model)
         )
         result = await self.session.execute(stmt)
-        model: Model = result.scalars().all()
+        model = result.scalars().all()
         self.validate_input_data(obj_model=model)
 
     async def delete(self, **filters) -> None:
@@ -73,7 +71,7 @@ class BaseRepository(Generic[Model]):
             .returning(self.model)
         )
         result = await self.session.execute(stmt)
-        model: Model = result.scalars().all()
+        model = result.scalars().all()
         self.validate_input_data(obj_model=model)
 
     def validate_input_data(self, obj_model: ValidateDatas):
