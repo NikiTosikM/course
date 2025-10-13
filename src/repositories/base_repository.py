@@ -45,11 +45,12 @@ class BaseRepository(Generic[Model]):
     async def add(self, data: Schema) -> Schema:
         stmt = insert(self.model).values(**data.model_dump()).returning(self.model)
         result: Result = await self.session.execute(stmt)
+        model = result.scalar_one()
         
-        return result.scalar_one()
+        return self.schema.model_validate(model)
     
     async def add_bulk(self, data: list[Schema]) -> Schema:
-        stmt = insert(self.model).values([item.model_dump() for item in data])
+        stmt = insert(self.model).values([item.model_dump(exclude_unset=True) for item in data])
         await self.session.execute(stmt)
 
     async def update(
@@ -87,5 +88,6 @@ class BaseRepository(Generic[Model]):
     async def specific_object(self, hotel_id: int):
         query = select(self.model).where(self.model.id==hotel_id)
         result = await self.session.execute(query)
+        model = result.scalar_one_or_none()
         
-        return result.scalar_one_or_none()
+        return self.schema.model_validate(model)

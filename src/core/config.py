@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Literal
 
 from pydantic import BaseModel
 from pydantic_settings import SettingsConfigDict, BaseSettings
@@ -32,7 +33,7 @@ class Settings(BaseSettings):
         env_ignore_empty=True,
         extra="ignore"
     )
-    
+    mode: Literal["TEST", "LOCAL", "PROD",]
     db: DBConfig
     token: TokenConfig
     

@@ -2,7 +2,6 @@ from typing import Annotated
 
 from fastapi import Depends, Request, HTTPException, status, Response, Query
 import jwt
-from pydantic import BaseModel
 
 from service.auth.auth_service import auth_service
 from utils.db.db_manager import DBManager

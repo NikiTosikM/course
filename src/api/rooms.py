@@ -6,7 +6,7 @@ from fastapi import APIRouter, Query
 from schemas.rooms import (
     RoomHotelSchema,
     ResponceRoomHotelSchema,
-    UpdateRoomHotelSchema,
+    RoomHotelFacilitieSchema,
     RequestRoomHotelPartialUpdateSchema,
     RoomHotelParticalUpdateSchema,
     RoomHotelAddSchema,
@@ -73,7 +73,7 @@ async def update_room(
     db_manager: DB_Dep,
     hotel_id: int,
     room_id: int,
-    update_data_room: UpdateRoomHotelSchema,
+    update_data_room: RoomHotelFacilitieSchema,
 ):
     room_data = RoomHotelAddSchema(**update_data_room.model_dump())
     await db_manager.room.update(data=room_data, hotel_id=hotel_id, id=room_id)

@@ -2,7 +2,7 @@ from repositories.base_repository import BaseRepository, Model
 from sqlalchemy import insert, Result, select
 from sqlalchemy.orm import selectinload
 
-from models import Rooms
+from src.models import Rooms
 from schemas.rooms import RoomHotelSchema, ResponceRoomHotelSchema
 from repositories.db_expressions import (
     get_info_available_rooms,
@@ -53,8 +53,6 @@ class RoomRepository(BaseRepository[Rooms]):
             room.quantity = id_count_available_room[room.id]
 
         return free_room
-
-        # print("вот запрос", query.compile(bind=async_engine, compile_kwargs={"literal_binds": True}))
         
     async def get_one_or_none(self, **filter_by):
         query = (

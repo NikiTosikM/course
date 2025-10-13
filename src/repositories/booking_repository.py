@@ -1,6 +1,5 @@
 from repositories.base_repository import BaseRepository
 from models.bookings import Booking
-from schemas.bookings import DBBookingSchema
 
 
 class BookingRepository(BaseRepository):

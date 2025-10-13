@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from fastapi import Query, Depends
 
 
@@ -23,8 +23,8 @@ class HotelResponceSchema(BaseModel):
     title: str
     location: str
     
-    class Config:
-        from_attributes = True 
+    model_config = ConfigDict(
+        from_attributes=True)
     
 
 

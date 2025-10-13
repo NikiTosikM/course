@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status, Response
 
-from schemas.user import (
+from src.schemas.user import (
     UserRequestSchema,
     UserResponceSchema,
     UserDBSchema,
