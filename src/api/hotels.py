@@ -2,8 +2,6 @@ from typing import Annotated
 from datetime import date
 
 from fastapi import APIRouter, Query
-from fastapi_cache.decorator import cache
-
 from api.dependencies import DB_Dep
 from schemas.hotels import (
     HotelSchema,
@@ -17,7 +15,6 @@ router = APIRouter(tags=["Работа с отелями"])
 
 
 @router.get("/hotels")
-@cache(expire=20)
 async def get_hotels(
     db_manager: DB_Dep,
     pig_hotels: PiganHotelDep,
@@ -26,7 +23,6 @@ async def get_hotels(
     location: Annotated[str | None, Query(description="Локация")] = None,
     title: Annotated[str | None, Query(description="Название отеля")] = None
 ):
-    print('Обращение к БД', flush=True)
     hotels = await db_manager.hotel.get_filtered(
             date_to=date_to,
             date_from=data_from,

@@ -3,16 +3,9 @@ from logging.config import fileConfig
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
-from core.db.base_model import Base
-from core.config import settings
-from models import (
-    Booking,
-    Rooms,
-    Hotels,
-    User,
-    Facilities,
-    RoomFacilities
-)
+from src.core.db.base_model import Base
+from src.core.config import settings
+from src.models import *  # noqa: F403
 from alembic import context
 
 # this is the Alembic Config object, which provides

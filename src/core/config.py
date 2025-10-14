@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Literal
 
 from pydantic import BaseModel
 from pydantic_settings import SettingsConfigDict, BaseSettings
@@ -24,16 +25,6 @@ class TokenConfig(BaseModel):
     access_token_expire_minutes: int
 
 
-class RedisConfig(BaseModel):
-    host: str
-    port: int
-    max_connection: int
-    
-    @property
-    def get_url_connect(self):
-        return f"redis://{self.host}:{self.port}"
-
-
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=ROOT_DIR/".env",
@@ -42,10 +33,9 @@ class Settings(BaseSettings):
         env_ignore_empty=True,
         extra="ignore"
     )
-    
+    mode: Literal["TEST", "LOCAL", "PROD",]
     db: DBConfig
     token: TokenConfig
-    redis: RedisConfig
     
     
 settings = Settings()

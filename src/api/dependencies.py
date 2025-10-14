@@ -2,12 +2,10 @@ from typing import Annotated
 
 from fastapi import Depends, Request, HTTPException, status, Response, Query
 import jwt
-from pydantic import BaseModel
 
 from service.auth.auth_service import auth_service
 from utils.db.db_manager import DBManager
 from core.db.base_model import async_session_maker
-from core.redis_.redis_connector import redis_manager
 
 
 def get_token_from_cookie(request: Request):
@@ -42,6 +40,7 @@ def get_current_user_id(token: str = Depends(get_token_from_cookie)):
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Token is not valid"
         )
 
+
 UserIdDepen = Annotated[int, Depends(get_current_user_id)]
 
 
@@ -53,6 +52,3 @@ async def get_db_manager():
 DB_Dep = Annotated[DBManager, Depends(get_db_manager)]
 
 
-async def get_redis_client():
-    async with redis_manager.create_client() as client:
-        yield client

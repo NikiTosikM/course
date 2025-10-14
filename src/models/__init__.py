@@ -1,6 +1,5 @@
-from .hotels import Hotels
-from .rooms import Rooms
-from .user import User
-from .bookings import Booking
-from .facilities import Facilities, RoomFacilities
-
+from models.hotels import Hotels
+from models.rooms import Rooms
+from models.user import User
+from models.bookings import Booking
+from models.facilities import Facilities, RoomFacilities

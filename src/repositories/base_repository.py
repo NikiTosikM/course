@@ -4,14 +4,14 @@ from fastapi import HTTPException, status
 from sqlalchemy import Result, delete, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from repositories.mappers.base_mapper import DBModel, Schema, BaseDataMapper
+from repositories.mappers.base_mapper import DBModel, Schema
 
 ValidateDatas = TypeVar("ValidateDatas", DBModel, None, list[DBModel])
 
 
 class BaseRepository(Generic[DBModel]):
-    model: type[DBModel]
-    mapper: type[BaseDataMapper]
+    model: DBModel
+    schema: Schema
     
     def __init__(
         self,
@@ -27,7 +27,7 @@ class BaseRepository(Generic[DBModel]):
             .filter_by(**filters)
         )
         result: Result = await self.session.execute(query)
-        return [self.mapper.map_to_domain_entity(model) for model in result.scalars().all()]
+        return [self.schema.model_validate(model) for model in result.scalars().all()]
 
     async def get_all(self) -> list[DBModel]:
         return await self.get_filtered()
@@ -39,13 +39,14 @@ class BaseRepository(Generic[DBModel]):
         return result.scalar_one_or_none()
 
     async def add(self, data: Schema) -> Schema:
-        stmt = insert(self.model).values(**self.mapper.map_to_dict(data)).returning(self.model)
+        stmt = insert(self.model).values(**data.model_dump()).returning(self.model)
         result: Result = await self.session.execute(stmt)
+        model = result.scalar_one()
         
-        return result.scalar_one()
+        return self.schema.model_validate(model)
     
     async def add_bulk(self, data: list[Schema]) -> Schema:
-        stmt = insert(self.model).values([self.mapper.map_to_dict(item) for item in data])
+        stmt = insert(self.model).values([item.model_dump(exclude_unset=True) for item in data])
         await self.session.execute(stmt)
 
     async def update(
@@ -53,7 +54,7 @@ class BaseRepository(Generic[DBModel]):
     ) -> None:
         stmt = (
             update(self.model)
-            .values(**self.mapper.map_to_dict(data=data, exclude_unset=exclude_unset))
+            .values(**data.model_dump(exclude_unset=exclude_unset))
             .filter_by(**filter_by)
             .returning(self.model)
         )
@@ -83,5 +84,6 @@ class BaseRepository(Generic[DBModel]):
     async def specific_object(self, hotel_id: int):
         query = select(self.model).where(self.model.id==hotel_id)
         result = await self.session.execute(query)
+        model = result.scalar_one_or_none()
         
-        return result.scalar_one_or_none()
+        return self.schema.model_validate(model)
