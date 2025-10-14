@@ -1,4 +1,4 @@
-from repositories.base_repository import BaseRepository, Model
+from repositories.base_repository import BaseRepository
 from sqlalchemy import insert, Result, select
 from sqlalchemy.orm import selectinload
 
@@ -7,11 +7,12 @@ from schemas.rooms import RoomHotelSchema, ResponceRoomHotelSchema
 from repositories.db_expressions import (
     get_info_available_rooms,
 )
+from repositories.mappers.mappers import RoomDataMapper
 
 
 class RoomRepository(BaseRepository[Rooms]):
-    model: Model = Rooms
-    schema = ResponceRoomHotelSchema
+    model = Rooms
+    mapper = RoomDataMapper
 
     def __init__(self, session):
         super().__init__(session)
@@ -19,7 +20,7 @@ class RoomRepository(BaseRepository[Rooms]):
     async def add(self, data: RoomHotelSchema, **values) -> ResponceRoomHotelSchema:
         stmt = (
             insert(self.model)
-            .values(**data.model_dump(), **values)
+            .values(self.mapper.map_to_persistence_entity(data), **values)
             .returning(self.model)
         )
         result: Result = await self.session.execute(stmt)
@@ -47,7 +48,7 @@ class RoomRepository(BaseRepository[Rooms]):
         # получаем информацию про свободные комнаты
         result = await self.session.execute(query_free_rooms)
         rooms = [
-            ResponceRoomHotelSchema.model_validate(room)
+            self.mapper.map_to_domain_entity(room)
             for room in result.scalars().all()
         ]  # создаем схему комнаты с удобствами
 

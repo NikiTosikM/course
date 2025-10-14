@@ -5,12 +5,13 @@ from sqlalchemy import select, Result
 from repositories.base_repository import BaseRepository
 from models import Hotels, Rooms
 from repositories.db_expressions import getting_available_rooms
-from schemas import HotelResponceSchema, PaginationHotels
+from schemas import  PaginationHotels
+from repositories.mappers.mappers import HotelDataMapper
 
 
 class HoterRepository(BaseRepository[Hotels]):
     model = Hotels
-    schema = HotelResponceSchema
+    mapper = HotelDataMapper
 
     def __init__(self, session):
         super().__init__(session)
@@ -50,4 +51,4 @@ class HoterRepository(BaseRepository[Hotels]):
         
         result: Result = await self.session.execute(query)
 
-        return [self.schema.model_validate(model) for model in result.scalars().all()]
+        return [self.mapper.map_to_domain_entity(model) for model in result.scalars().all()]

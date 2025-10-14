@@ -3,15 +3,17 @@ from sqlalchemy import select, Result, delete, insert
 from repositories.base_repository import BaseRepository
 from models.facilities import Facilities, RoomFacilities
 from schemas.facility import FacilityResponceSchema
+from repositories.mappers.mappers import FacilityDataMapper, RoomFacilityDataMapper
 
 
 class FacilityRepository(BaseRepository[Facilities]):
     model = Facilities
-    schema = FacilityResponceSchema
+    mapper = FacilityDataMapper
 
 
 class RoomFacilitiesRepository(BaseRepository[RoomFacilities]):
     model = RoomFacilities
+    mapper = RoomFacilityDataMapper
 
     async def update(
         self,
