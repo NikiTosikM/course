@@ -3,8 +3,6 @@ from repositories.room_repository import RoomRepository
 from repositories.user_repository import UserRepository
 from repositories.booking_repository import BookingRepository
 from repositories.facility_repository import FacilityRepository, RoomFacilitiesRepository
-from src.models import User 
-from schemas import DBResponceBookingSchema
 
 
 class DBManager:
@@ -14,7 +12,7 @@ class DBManager:
     async def __aenter__(self):
         self.session = self.session_factory()
 
-        self.user = UserRepository(session=self.session)
+        self.user: UserRepository = UserRepository(session=self.session)
         self.room = RoomRepository(session=self.session)
         self.hotel = HoterRepository(session=self.session)
         self.booking = BookingRepository(

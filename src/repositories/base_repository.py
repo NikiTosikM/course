@@ -1,11 +1,9 @@
 from typing import Generic, TypeVar
 
 from fastapi import HTTPException, status
-from pydantic import BaseModel
 from sqlalchemy import Result, delete, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.db.base_model import Base
 from repositories.mappers.base_mapper import DBModel, Schema
 
 ValidateDatas = TypeVar("ValidateDatas", DBModel, None, list[DBModel])

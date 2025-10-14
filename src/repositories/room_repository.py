@@ -1,4 +1,4 @@
-from repositories.base_repository import BaseRepository, Model
+from repositories.base_repository import BaseRepository, DBModel
 from sqlalchemy import insert, Result, select
 from sqlalchemy.orm import selectinload
 
@@ -10,7 +10,7 @@ from repositories.db_expressions import (
 
 
 class RoomRepository(BaseRepository[Rooms]):
-    model: Model = Rooms
+    model: DBModel = Rooms
     schema = ResponceRoomHotelSchema
 
     def __init__(self, session):

@@ -23,7 +23,7 @@ async def register(user_data: UserRequestSchema):
         name=user_data.name, email=user_data.email, hashpassword=hash_password
     )
     async with async_session_maker() as session:
-        created_user: User = await UserRepository(session=session, model=User).add(
+        created_user: User = await UserRepository(session=session).add(
             data=user_data_for_db
         )
         returned_data = UserResponceSchema.model_validate(created_user)
@@ -36,7 +36,7 @@ async def register(user_data: UserRequestSchema):
 async def login(login_data: UserLoginSchema, responce: Response):
     async with async_session_maker() as session:
         user: User | None = await UserRepository(
-            session=session, model=User
+            session=session
         ).get_one_or_none(email=login_data.email)
         await session.commit()
     verify_hashpassword: bool = auth_service.verify_password(
@@ -57,7 +57,7 @@ async def login(login_data: UserLoginSchema, responce: Response):
 @router.get("/me")
 async def about_me(user_id: UserIdDepen): # type: ignore
     async with async_session_maker() as session:
-        user = await UserRepository(session=session, model=User).get_one_or_none(id=user_id)
+        user = await UserRepository(session=session).get_one_or_none(id=user_id)
         await session.commit()
     
     return user

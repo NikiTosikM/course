@@ -24,10 +24,10 @@ async def get_all_rooms(
     hotel_id: int,
     db_manager: DB_Dep,
     data_from: Annotated[
-        date, Query(description="Дата заезда в номер", example="2025-09-10")
+        date, Query(description="Дата заезда в номер", examples=["2025-09-10"])
     ],
     data_to: Annotated[
-        date, Query(description="Дата выезда из номера", example="2025-09-15")
+        date, Query(description="Дата выезда из номера", examples=["2025-09-15"])
     ],
 ):
     rooms: list[Rooms] = await db_manager.room.get_all(
@@ -41,10 +41,10 @@ async def get_all_rooms(
 async def get_room(
     db_manager: DB_Dep,
     data_from: Annotated[
-        date, Query(description="Дата заезда в номер", example="2025-09-10")
+        date, Query(description="Дата заезда в номер", examples=["2025-09-10"])
     ],
     data_to: Annotated[
-        date, Query(description="Дата выезда из номера", example="2025-09-15")
+        date, Query(description="Дата выезда из номера", examples=["2025-09-15"])
     ],
     hotel_id: int,
     room_id: int,
