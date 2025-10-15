@@ -5,6 +5,7 @@ from sqlalchemy import NullPool
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from httpx import AsyncClient, ASGITransport
 
+from src.api.dependencies import get_db_manager
 from src.core.config import settings
 from src.core.db.base_model import Base
 from src.models import *  # noqa: F403
@@ -21,7 +22,7 @@ async_session_maker = async_sessionmaker(engine_null_pool, expire_on_commit=Fals
 @pytest.fixture(autouse=True, scope="session")
 async def create_tables():
     assert settings.mode == "TEST"
-
+    
     async with engine_null_pool.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
@@ -45,10 +46,17 @@ async def adding_data_to_database(create_tables):
             
             await db_man.commit()
         
+        
+async def test_db_manager() -> DBManager:
+    async with DBManager(session_factory=async_session_maker) as db:
+        yield db
+        
+app.dependency_overrides[get_db_manager] = test_db_manager
+        
 
 @pytest.fixture()
 async def db_manager() -> DBManager:
-    async with DBManager(session_factory=async_session_maker) as db:
+    async for db in test_db_manager():
         yield db
 
 
@@ -58,7 +66,7 @@ async def create_client() -> AsyncClient:
         yield client
         
         
-@pytest.fixture(scope="session" ,autouse=True)
+@pytest.fixture(scope="session", autouse=True)
 async def register_user(create_client):
     await create_client.post(
         url="/auth/register",

@@ -1,13 +1,15 @@
-from src.schemas import HotelSchema, HotelResponceSchema
+from httpx import Response
 
 
-async def test_create_hotel(db_manager):
-    hotel = HotelSchema(title="Samara five stars", location="Samara")
-    responce_hotel: HotelResponceSchema = await db_manager.hotel.add(data=hotel)
-    await db_manager.commit()
-        
-    received_hotel: HotelResponceSchema = await db_manager.hotel.specific_object(
-            hotel_id=responce_hotel.id
-        )
-        
-    assert responce_hotel == received_hotel
+async def test_get_hotels(create_client):
+    responce: Response = await create_client.get(
+        url="/hotels",
+        params={
+            "date_from": "2025-10-10",
+            "date_to": "2025-10-15"
+        }
+    )
+    
+    assert responce.status_code == 200
+    assert responce.json()
+    print(responce.json())

@@ -58,9 +58,8 @@ class BaseRepository(Generic[DBModel]):
             .filter_by(**filter_by)
             .returning(self.model)
         )
-        result = await self.session.execute(stmt)
-        model = result.scalars().all()
-        self.validate_input_data(obj_model=model)
+        await self.session.execute(stmt)
+
 
     async def delete(self, **filters) -> None:
         stmt = (

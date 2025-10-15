@@ -13,7 +13,7 @@ from schemas.rooms import (
 )
 from schemas.facility import RoomFacilityAddSchema
 from models.rooms import Rooms
-from api.dependencies import DB_Dep
+from src.api.dependencies import DB_Dep
 
 
 router = APIRouter(prefix="/hotels", tags=["Rooms"])

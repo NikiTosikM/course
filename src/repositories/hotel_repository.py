@@ -3,8 +3,8 @@ from datetime import date
 from sqlalchemy import select, Result
 
 from repositories.base_repository import BaseRepository
-from models import Hotels, Rooms
-from repositories.db_expressions import getting_available_rooms
+from src.models import Hotels, Rooms
+from repositories.db_expressions import get_info_available_rooms
 from schemas import HotelResponceSchema, PaginationHotels
 
 
@@ -24,7 +24,7 @@ class HoterRepository(BaseRepository[Hotels]):
         title: str | None,
     ) -> list[Hotels] | None:
         result: Result = await self.session.execute(
-            getting_available_rooms(date_from=date_from, date_to=date_to)
+            get_info_available_rooms(date_from=date_from, date_to=date_to)
         )
         ids_all_available_rooms: list[int] = result.scalars().all()
 

@@ -5,7 +5,7 @@ from schemas.bookings import (
     DBBookingSchema,
     DBResponceBookingSchema,
 )
-from api.dependencies import UserIdDepen, DB_Dep
+from src.api.dependencies import UserIdDepen, DB_Dep
 from models import Rooms, Booking
 
 

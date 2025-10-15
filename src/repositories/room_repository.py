@@ -2,7 +2,7 @@ from repositories.base_repository import BaseRepository, DBModel
 from sqlalchemy import insert, Result, select
 from sqlalchemy.orm import selectinload
 
-from src.models import Rooms
+from models import Rooms
 from schemas.rooms import RoomHotelSchema, ResponceRoomHotelSchema
 from repositories.db_expressions import (
     get_info_available_rooms,

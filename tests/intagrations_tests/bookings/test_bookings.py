@@ -29,6 +29,8 @@ async def test_create_booking(db_manager):
     booking_read: DBResponceBookingSchema = await db_manager.booking.get_one_or_none(
         id=booking_add.id
     )
+    assert booking_read
+    assert booking_read.id == booking_add.id
 
     # update
     booking = DBBookingSchema(
@@ -39,8 +41,18 @@ async def test_create_booking(db_manager):
         date_to=date(year=2025, month=10, day=25),
     )
     await db_manager.booking.update(data=booking, id=booking_read.id)
+    update_booking: DBResponceBookingSchema = await db_manager.booking.get_one_or_none(
+        id=booking_add.id
+    )
+    assert update_booking.id == booking_read.id
+    assert update_booking.date_from == booking.date_from
+    assert update_booking.date_to == booking.date_to
 
     # # delete
     await db_manager.booking.delete(id=booking_read.id)
+    booking_delete: DBResponceBookingSchema = await db_manager.booking.get_one_or_none(
+        id=booking_add.id
+    )
+    assert booking_delete is None
     
     await db_manager.commit()

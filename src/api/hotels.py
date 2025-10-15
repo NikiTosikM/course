@@ -2,7 +2,7 @@ from typing import Annotated
 from datetime import date
 
 from fastapi import APIRouter, Query
-from api.dependencies import DB_Dep
+from src.api.dependencies import DB_Dep
 from schemas.hotels import (
     HotelSchema,
     HotelResponceSchema,

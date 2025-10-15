@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from api.dependencies import DB_Dep
+from src.api.dependencies import DB_Dep
 from schemas import FacilityRequestSchema, FacilityResponceSchema
 
 
