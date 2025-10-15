@@ -1,19 +1,19 @@
 import json
 
 import pytest
+from httpx import ASGITransport, AsyncClient, Response
 from sqlalchemy import NullPool
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
-from httpx import AsyncClient, ASGITransport
 
 from src.api.dependencies import get_db_manager
 from src.core.config import settings
 from src.core.db.base_model import Base
+from src.main import app
 from src.models import *  # noqa: F403
-from src.utils.db.db_manager import DBManager
 from src.schemas.hotels import HotelSchema
 from src.schemas.rooms import RoomHotelFacilitieSchema
-from src.main import app
-
+from src.schemas.user import UserRequestSchema
+from src.utils.db.db_manager import DBManager
 
 engine_null_pool = create_async_engine(settings.db.get_db_url, poolclass=NullPool)
 async_session_maker = async_sessionmaker(engine_null_pool, expire_on_commit=False)
@@ -22,37 +22,38 @@ async_session_maker = async_sessionmaker(engine_null_pool, expire_on_commit=Fals
 @pytest.fixture(autouse=True, scope="session")
 async def create_tables():
     assert settings.mode == "TEST"
-    
+
     async with engine_null_pool.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
-        
+
 
 @pytest.fixture(autouse=True, scope="session")
 async def adding_data_to_database(create_tables):
-        with open("tests/db_datas/mock_hotels.json", encoding="utf-8") as file:
-            file_hotels = json.load(file)
+    with open("tests/db_datas/mock_hotels.json", encoding="utf-8") as file:
+        file_hotels = json.load(file)
 
-        with open("tests/db_datas/mock_rooms.json", encoding="utf-8") as file:
-            file_rooms = json.load(file)
-            rooms_schemas = [RoomHotelFacilitieSchema(**room) for room in file_rooms]
-            
-        hotels_schemes = [HotelSchema(**hotel) for hotel in file_hotels]
+    with open("tests/db_datas/mock_rooms.json", encoding="utf-8") as file:
+        file_rooms = json.load(file)
         rooms_schemas = [RoomHotelFacilitieSchema(**room) for room in file_rooms]
-            
-        async with DBManager(session_factory=async_session_maker) as db_man:
-            await db_man.hotel.add_bulk(hotels_schemes)
-            await db_man.room.add_bulk(rooms_schemas)
-            
-            await db_man.commit()
-        
-        
+
+    hotels_schemes = [HotelSchema(**hotel) for hotel in file_hotels]
+    rooms_schemas = [RoomHotelFacilitieSchema(**room) for room in file_rooms]
+
+    async with DBManager(session_factory=async_session_maker) as db_man:
+        await db_man.hotel.add_bulk(hotels_schemes)
+        await db_man.room.add_bulk(rooms_schemas)
+
+        await db_man.commit()
+
+
 async def test_db_manager() -> DBManager:
     async with DBManager(session_factory=async_session_maker) as db:
         yield db
-        
+
+
 app.dependency_overrides[get_db_manager] = test_db_manager
-        
+
 
 @pytest.fixture()
 async def db_manager() -> DBManager:
@@ -62,17 +63,37 @@ async def db_manager() -> DBManager:
 
 @pytest.fixture(scope="session")
 async def create_client() -> AsyncClient:
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as client:
         yield client
-        
-        
-@pytest.fixture(scope="session", autouse=True)
-async def register_user(create_client):
+
+
+@pytest.fixture(scope="session")
+async def register_user(create_client) -> dict:
+    user_data = UserRequestSchema(name="nikita", email="12345@mail.ru", password="1234567899")
     await create_client.post(
         url="/auth/register",
-        json={
-            "name": "nikita",
-            "email": "12345@mail.ru",
-            "password": "1234567899"
-        }
+        json=user_data.model_dump(),
     )
+    
+    return user_data
+
+
+@pytest.fixture(scope="session", autouse=True)
+async def authorized_user(create_client,  register_user):
+    responce: Response = await create_client.post(
+        url="/auth/login",
+        json={"email": register_user.email, "password": register_user.password}
+    )
+    access_token = responce.cookies.get("access_token")
+    
+    assert responce.status_code == 200
+    assert access_token
+    
+    create_client.headers.update({"access_token": access_token})
+    
+    return create_client
+    
+    
+    
