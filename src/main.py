@@ -4,7 +4,7 @@ from fastapi import FastAPI
 import uvicorn
 from pathlib import Path
 
-from api import main_router
+from src.api import main_router
 
 
 

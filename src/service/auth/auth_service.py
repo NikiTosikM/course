@@ -1,7 +1,7 @@
 from datetime import datetime, timezone, timedelta
 
 from passlib.context import CryptContext
-from core.config import settings
+from src.core.config import settings
 import jwt
 
 

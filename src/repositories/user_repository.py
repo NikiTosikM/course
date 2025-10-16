@@ -1,6 +1,6 @@
-from repositories.base_repository import BaseRepository
-from models.user import User
-from schemas.user import UserResponceSchema
+from src.repositories.base_repository import BaseRepository
+from src.models.user import User
+from src.schemas.user import UserResponceSchema
 
 
 class UserRepository(BaseRepository[User]):

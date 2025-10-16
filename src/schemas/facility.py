@@ -1,6 +1,6 @@
 from pydantic import Field
 
-from core.schemas.base_schema import BaseModelSchema, BaseModel
+from src.core.schemas.base_schema import BaseModelSchema, BaseModel
 
 
 class FacilityRequestSchema(BaseModelSchema):

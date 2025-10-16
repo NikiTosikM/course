@@ -6,15 +6,10 @@ from src.schemas.bookings import DBBookingSchema, DBResponceBookingSchema
 async def test_create_booking(db_manager):
     # create
     user_id = (await db_manager.user.get_all())[0].id
-    hotel_id = (await db_manager.user.get_all())[0].id
+    room_id = (await db_manager.room.get_all())[0].id
 
     date_from = date(year=2025, month=10, day=10)
     date_to = date(year=2025, month=10, day=15)
-    room_id = (
-        await db_manager.room.get_all(
-            date_from=date_from, date_to=date_to, hotel_id=hotel_id
-        )
-    )[0].id
 
     booking = DBBookingSchema(
         room_id=room_id,
@@ -54,5 +49,5 @@ async def test_create_booking(db_manager):
         id=booking_add.id
     )
     assert booking_delete is None
-    
+
     await db_manager.commit()

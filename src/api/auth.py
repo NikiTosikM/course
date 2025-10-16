@@ -1,16 +1,16 @@
 from fastapi import APIRouter, HTTPException, status, Response
 
-from schemas.user import (
+from src.schemas.user import (
     UserRequestSchema,
     UserResponceSchema,
     UserDBSchema,
     UserLoginSchema,
 )
-from models.user import User
-from core.db.base_model import async_session_maker
-from repositories.user_repository import UserRepository
-from service.auth.auth_service import auth_service
-from api.dependencies import UserIdDepen, LogoutDepen
+from src.models.user import User
+from src.core.db.base_model import async_session_maker
+from src.repositories.user_repository import UserRepository
+from src.service.auth.auth_service import auth_service
+from src.api.dependencies import UserIdDepen, LogoutDepen
 
 
 router = APIRouter(prefix="/auth", tags=["Authenticated and authorization"])

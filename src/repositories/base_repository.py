@@ -4,7 +4,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import Result, delete, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from repositories.mappers.base_mapper import DBModel, Schema
+from src.repositories.mappers.base_mapper import DBModel, Schema
 
 ValidateDatas = TypeVar("ValidateDatas", DBModel, None, list[DBModel])
 
@@ -20,7 +20,7 @@ class BaseRepository(Generic[DBModel]):
         self.session = session
 
 
-    async def get_filtered(self, *expressions, **filters) -> list[DBModel]:
+    async def get_filtered(self, *expressions, **filters) -> list[Schema]:
         query = (
             select(self.model)
             .filter(*expressions)

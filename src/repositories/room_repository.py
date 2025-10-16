@@ -1,12 +1,13 @@
-from repositories.base_repository import BaseRepository, DBModel
-from sqlalchemy import insert, Result, select
+from fastapi import HTTPException, status
+from sqlalchemy import Result, insert, select
 from sqlalchemy.orm import selectinload
 
-from models import Rooms
-from schemas.rooms import RoomHotelSchema, ResponceRoomHotelSchema
-from repositories.db_expressions import (
+from src.models import Rooms
+from src.repositories.base_repository import BaseRepository, DBModel
+from src.repositories.db_expressions import (
     get_info_available_rooms,
 )
+from src.schemas.rooms import ResponceRoomHotelSchema, RoomHotelSchema
 
 
 class RoomRepository(BaseRepository[Rooms]):
@@ -15,6 +16,18 @@ class RoomRepository(BaseRepository[Rooms]):
 
     def __init__(self, session):
         super().__init__(session)
+
+    async def get_filtered(
+        self, *expressions, **filters
+    ) -> list[ResponceRoomHotelSchema]:
+        query = (
+            select(self.model)
+            .options(selectinload(Rooms.facilities))
+            .filter(*expressions)
+            .filter_by(**filters)
+        )
+        result: Result = await self.session.execute(query)
+        return [self.schema.model_validate(model) for model in result.scalars().all()]
 
     async def add(self, data: RoomHotelSchema, **values) -> ResponceRoomHotelSchema:
         stmt = (
@@ -61,18 +74,25 @@ class RoomRepository(BaseRepository[Rooms]):
 
         return rooms
 
-    async def get_all(self, date_from: str, date_to: str, hotel_id: int):
+    async def get_all_free_rooms(self, date_from: str, date_to: str, hotel_id: int):
         return await self._get_available_rooms(date_from, date_to, hotel_id)
 
         # print("вот запрос", query.compile(bind=async_engine, compile_kwargs={"literal_binds": True}))
 
     async def get_one_or_none(
-        self, date_from: str, date_to: str, hotel_id: int, room_id: int, **filter_by
+        self,
+        date_from: str,
+        date_to: str,
+        hotel_id: int | None = None,
+        room_id: int | None = None,
+        **filter_by,
     ):
-        return await self._get_available_rooms(
+        id_room: list[Rooms] = await self._get_available_rooms(
             date_from=date_from,
             date_to=date_to,
             hotel_id=hotel_id,
             room_id=room_id,
             **filter_by,
         )
+
+        return id_room[0] if id_room else None

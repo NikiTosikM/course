@@ -3,7 +3,7 @@ from datetime import date
 
 from fastapi import APIRouter, Query
 from src.api.dependencies import DB_Dep
-from schemas.hotels import (
+from src.schemas.hotels import (
     HotelSchema,
     HotelResponceSchema,
     HotelPartialUpdateSchema,

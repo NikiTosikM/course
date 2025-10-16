@@ -1,8 +1,8 @@
 from sqlalchemy import select, Result, delete, insert
 
-from repositories.base_repository import BaseRepository
-from models.facilities import Facilities, RoomFacilities
-from schemas.facility import FacilityResponceSchema
+from src.repositories.base_repository import BaseRepository
+from src.models.facilities import Facilities, RoomFacilities
+from src.schemas.facility import FacilityResponceSchema
 
 
 class FacilityRepository(BaseRepository[Facilities]):

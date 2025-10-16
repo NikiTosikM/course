@@ -1,6 +1,6 @@
 from datetime import date
 
-from core.schemas.base_schema import BaseModelSchema
+from src.core.schemas.base_schema import BaseModelSchema
 
 from pydantic import Field
 

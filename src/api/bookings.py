@@ -1,12 +1,12 @@
 from fastapi import APIRouter
 
-from schemas.bookings import (
+from src.schemas.bookings import (
     RequestBookingSchema,
     DBBookingSchema,
     DBResponceBookingSchema,
 )
 from src.api.dependencies import UserIdDepen, DB_Dep
-from models import Rooms, Booking
+from src.models import Rooms, Booking
 
 
 router = APIRouter(prefix="/bookings", tags=["Заказы"])
@@ -16,17 +16,17 @@ router = APIRouter(prefix="/bookings", tags=["Заказы"])
 async def create_booking(
     booking_data: RequestBookingSchema, user_id: UserIdDepen, db_manager: DB_Dep
 ):
-    room: Rooms = await db_manager.room.get_one_or_none(id=booking_data.room_id)
-    room_price = room.price
-    total_cost_booking: int = (
-        room_price * (booking_data.date_to - booking_data.date_from).days
+    room: Rooms = await db_manager.room.get_one_or_none(
+        room_id=booking_data.room_id,
+        date_from=booking_data.date_from,
+        date_to=booking_data.date_to,
     )
 
-    booking = DBBookingSchema(
-        user_id=user_id, price=total_cost_booking, **booking_data.model_dump()
+    booking: DBResponceBookingSchema = await db_manager.booking.add_booking(
+        booking_data=booking_data,
+        room=room,
+        user_id=user_id
     )
-
-    booking: DBResponceBookingSchema = await db_manager.booking.add(data=booking)
     await db_manager.commit()
 
     return {"status": "ok", "booking": booking}

@@ -1,11 +1,11 @@
 from typing import Annotated
 
-from fastapi import Depends, Request, HTTPException, status, Response, Query
+from fastapi import Depends, Request, HTTPException, status, Response
 import jwt
 
-from service.auth.auth_service import auth_service
-from utils.db.db_manager import DBManager
-from core.db.base_model import async_session_maker
+from src.service.auth.auth_service import auth_service
+from src.utils.db.db_manager import DBManager
+from src.core.db.base_model import async_session_maker
 
 
 def get_token_from_cookie(request: Request):

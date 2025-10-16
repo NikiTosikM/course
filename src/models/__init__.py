@@ -1,5 +1,5 @@
-from models.hotels import Hotels
-from models.rooms import Rooms
-from models.user import User
-from models.bookings import Booking
-from models.facilities import Facilities, RoomFacilities
+from src.models.hotels import Hotels
+from src.models.rooms import Rooms
+from src.models.user import User
+from src.models.bookings import Booking
+from src.models.facilities import Facilities, RoomFacilities

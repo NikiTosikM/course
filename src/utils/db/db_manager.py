@@ -1,8 +1,8 @@
-from repositories.hotel_repository import HoterRepository
-from repositories.room_repository import RoomRepository
-from repositories.user_repository import UserRepository
-from repositories.booking_repository import BookingRepository
-from repositories.facility_repository import FacilityRepository, RoomFacilitiesRepository
+from src.repositories.hotel_repository import HoterRepository
+from src.repositories.room_repository import RoomRepository
+from src.repositories.user_repository import UserRepository
+from src.repositories.booking_repository import BookingRepository
+from src.repositories.facility_repository import FacilityRepository, RoomFacilitiesRepository
 
 
 class DBManager:

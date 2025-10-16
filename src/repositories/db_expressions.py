@@ -2,7 +2,7 @@ from datetime import date
 
 from sqlalchemy import func, select
 
-from models import Booking, Rooms
+from src.models import Booking, Rooms
 
 
 def getting_available_rooms(

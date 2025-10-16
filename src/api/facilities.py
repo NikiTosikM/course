@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
 from src.api.dependencies import DB_Dep
-from schemas import FacilityRequestSchema, FacilityResponceSchema
+from src.schemas import FacilityRequestSchema, FacilityResponceSchema
 
 
 router = APIRouter(prefix="/facilities", tags=["Удобства"])

@@ -2,10 +2,10 @@ from datetime import date
 
 from sqlalchemy import select, Result
 
-from repositories.base_repository import BaseRepository
+from src.repositories.base_repository import BaseRepository
 from src.models import Hotels, Rooms
-from repositories.db_expressions import get_info_available_rooms
-from schemas import HotelResponceSchema, PaginationHotels
+from src.repositories.db_expressions import get_info_available_rooms
+from src.schemas import HotelResponceSchema, PaginationHotels
 
 
 class HoterRepository(BaseRepository[Hotels]):

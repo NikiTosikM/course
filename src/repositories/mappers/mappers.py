@@ -1,6 +1,6 @@
-from repositories.mappers.base_mapper import BaseDataMapper
-from models import Hotels, Rooms, User, Booking, Facilities, RoomFacilities
-from schemas import (
+from src.repositories.mappers.base_mapper import BaseDataMapper
+from src.models import Hotels, Rooms, User, Booking, Facilities, RoomFacilities
+from src.schemas import (
     ResponceRoomHotelSchema,
     DBResponceBookingSchema,
     RoomFacilityResponceSchema,

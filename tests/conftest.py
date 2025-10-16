@@ -81,19 +81,17 @@ async def register_user(create_client) -> dict:
 
 
 @pytest.fixture(scope="session", autouse=True)
-async def authorized_user(create_client,  register_user):
+async def authorized_user(create_client,  register_user) -> AsyncClient:
     responce: Response = await create_client.post(
         url="/auth/login",
         json={"email": register_user.email, "password": register_user.password}
     )
-    access_token = responce.cookies.get("access_token")
+    access_token = create_client.cookies.get("access_token")
     
     assert responce.status_code == 200
     assert access_token
     
-    create_client.headers.update({"access_token": access_token})
-    
-    return create_client
+    yield create_client
     
     
     

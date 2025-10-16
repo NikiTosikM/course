@@ -3,7 +3,7 @@ from datetime import date
 
 from fastapi import APIRouter, Query
 
-from schemas.rooms import (
+from src.schemas.rooms import (
     RoomHotelSchema,
     ResponceRoomHotelSchema,
     RoomHotelFacilitieSchema,
@@ -11,8 +11,8 @@ from schemas.rooms import (
     RoomHotelParticalUpdateSchema,
     RoomHotelAddSchema,
 )
-from schemas.facility import RoomFacilityAddSchema
-from models.rooms import Rooms
+from src.schemas.facility import RoomFacilityAddSchema
+from src.models.rooms import Rooms
 from src.api.dependencies import DB_Dep
 
 
@@ -30,7 +30,7 @@ async def get_all_rooms(
         date, Query(description="Дата выезда из номера", examples=["2025-09-15"])
     ],
 ):
-    rooms: list[Rooms] = await db_manager.room.get_all(
+    rooms: list[Rooms] = await db_manager.room.get_all_free_rooms(
         date_from=data_from, date_to=data_to, hotel_id=hotel_id
     )
 

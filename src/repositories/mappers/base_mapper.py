@@ -2,7 +2,7 @@ from typing import Generic, TypeVar
 
 from pydantic import BaseModel
 
-from core.db.base_model import Base
+from src.core.db.base_model import Base
 
 
   

@@ -1,6 +1,6 @@
 from pydantic import ConfigDict
-from core.schemas.base_schema import BaseModelSchema
-from schemas.facility import FacilityResponceSchema
+from src.core.schemas.base_schema import BaseModelSchema
+from src.schemas.facility import FacilityResponceSchema
 
 
 class RoomHotelSchema(BaseModelSchema):
@@ -31,7 +31,7 @@ class ResponceRoomHotelSchema(BaseModelSchema):
     description: str | None = None
     price: int
     quantity: int
-    facilities: list[FacilityResponceSchema]
+    facilities: list[FacilityResponceSchema] = []
 
 
 
