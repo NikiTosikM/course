@@ -2,7 +2,6 @@ from fastapi import APIRouter
 
 from src.schemas.bookings import (
     RequestBookingSchema,
-    DBBookingSchema,
     DBResponceBookingSchema,
 )
 from src.api.dependencies import UserIdDepen, DB_Dep
@@ -21,7 +20,6 @@ async def create_booking(
         date_from=booking_data.date_from,
         date_to=booking_data.date_to,
     )
-
     booking: DBResponceBookingSchema = await db_manager.booking.add_booking(
         booking_data=booking_data,
         room=room,

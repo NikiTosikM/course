@@ -67,18 +67,7 @@ class BaseRepository(Generic[DBModel]):
             .filter_by(**filters)
             .returning(self.model)
         )
-        result = await self.session.execute(stmt)
-        model = result.scalars().all()
-        self.validate_input_data(obj_model=model)
-
-    def validate_input_data(self, obj_model: ValidateDatas):
-        if not obj_model or len(obj_model) > 1:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail={
-                    "message": "The method should return only one object of this model"
-                },
-            )
+        await self.session.execute(stmt)
 
     async def specific_object(self, hotel_id: int):
         query = select(self.model).where(self.model.id==hotel_id)
