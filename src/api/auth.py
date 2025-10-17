@@ -11,25 +11,25 @@ from src.core.db.base_model import async_session_maker
 from src.repositories.user_repository import UserRepository
 from src.service.auth.auth_service import auth_service
 from src.api.dependencies import UserIdDepen, LogoutDepen
+from src.api.dependencies import DB_Dep
 
 
 router = APIRouter(prefix="/auth", tags=["Authenticated and authorization"])
 
 
 @router.post("/register", response_model=UserResponceSchema)
-async def register(user_data: UserRequestSchema):
+async def register(user_data: UserRequestSchema, db: DB_Dep):
     hash_password: str = auth_service.create_hastpassword(password=user_data.password)
     user_data_for_db = UserDBSchema(
         name=user_data.name, email=user_data.email, hashpassword=hash_password
     )
     async with async_session_maker() as session:
-        created_user: User = await UserRepository(session=session).add(
+        created_user: UserResponceSchema = await db.user.add_user(
             data=user_data_for_db
         )
-        returned_data = UserResponceSchema.model_validate(created_user)
         await session.commit()
 
-    return returned_data
+    return created_user
 
 
 @router.post("/login")

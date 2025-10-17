@@ -3,25 +3,26 @@ import pytest
 
 from tests.parametrize_datas.bookings import datas_for_test_add_get_user_bookings
 from src.schemas.bookings import DBResponceBookingSchema
-from tests.conftest import test_db_manager
+from src.utils.db.db_manager import DBManager
+from tests.conftest import async_session_maker
 
 
-# async def test_create_booking(authorized_user, db_manager):
-#     room_id: int = (await db_manager.room.get_all())[0].id
-#     responce: Response = await authorized_user.post(
-#         url="/bookings/",
-#         json={"room_id": room_id, "date_from": "2025-01-01", "date_to": "2025-01-10"},
-#     )
-#     responce_data: dict = responce.json()
+async def test_create_booking(authorized_user, db_manager):
+    room_id: int = (await db_manager.room.get_all())[0].id
+    responce: Response = await authorized_user.post(
+        url="/bookings/",
+        json={"room_id": room_id, "date_from": "2025-01-01", "date_to": "2025-01-10"},
+    )
+    responce_data: dict = responce.json()
 
-#     assert responce.status_code == 200
-#     assert responce_data.get("status") == "ok"
-#     assert responce_data.get("booking")
+    assert responce.status_code == 200
+    assert responce_data.get("status") == "ok"
+    assert responce_data.get("booking")
 
 
 @pytest.fixture(scope="session")
 async def delete_bookings():
-    async for db in test_db_manager():
+    async with DBManager(session_factory=async_session_maker) as db:
         await db.booking.delete()
         await db.commit()
 
@@ -31,13 +32,13 @@ async def delete_bookings():
     datas_for_test_add_get_user_bookings,
 )
 async def test_add_get_user_bookings(
-    delete_bookings,
-    authorized_user,
     room_id,
     date_to,
     date_from,
     count_user_bookings,
     status_code,
+    delete_bookings,
+    authorized_user,
 ):
     create_booking_responce: Response = await authorized_user.post(
         url="/bookings/",
