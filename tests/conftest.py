@@ -62,17 +62,17 @@ async def db_manager() -> DBManager:
 
 
 @pytest.fixture(scope="session")
-async def create_client() -> AsyncClient:
+async def async_client() -> AsyncClient:
     async with AsyncClient(
         transport=ASGITransport(app=app), base_url="http://test"
     ) as client:
         yield client
 
 
-@pytest.fixture(scope="session")
-async def register_user(create_client) -> dict:
+@pytest.fixture(scope="session", autouse=True)
+async def register_user(async_client) -> dict:
     user_data = UserRequestSchema(name="nikita", email="12345@mail.ru", password="1234567899")
-    await create_client.post(
+    await async_client.post(
         url="/auth/register",
         json=user_data.model_dump(),
     )
@@ -80,18 +80,18 @@ async def register_user(create_client) -> dict:
     return user_data
 
 
-@pytest.fixture(scope="session", autouse=True)
-async def authorized_user(create_client,  register_user) -> AsyncClient:
-    responce: Response = await create_client.post(
+@pytest.fixture(scope="session")
+async def authorized_user(async_client,  register_user) -> AsyncClient:
+    responce: Response = await async_client.post(
         url="/auth/login",
         json={"email": register_user.email, "password": register_user.password}
     )
-    access_token = create_client.cookies.get("access_token")
+    access_token = async_client.cookies.get("access_token")
     
     assert responce.status_code == 200
     assert access_token
     
-    yield create_client
+    yield async_client
     
     
     

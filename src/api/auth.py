@@ -23,22 +23,17 @@ async def register(user_data: UserRequestSchema, db: DB_Dep):
     user_data_for_db = UserDBSchema(
         name=user_data.name, email=user_data.email, hashpassword=hash_password
     )
-    async with async_session_maker() as session:
-        created_user: UserResponceSchema = await db.user.add_user(
+    created_user: UserResponceSchema = await db.user.add_user(
             data=user_data_for_db
         )
-        await session.commit()
+    await db.commit()
 
     return created_user
 
 
 @router.post("/login")
-async def login(login_data: UserLoginSchema, responce: Response):
-    async with async_session_maker() as session:
-        user: User | None = await UserRepository(
-            session=session
-        ).get_one_or_none(email=login_data.email)
-        await session.commit()
+async def login(login_data: UserLoginSchema, responce: Response, db: DB_Dep):
+    user: User | None = await db.user.get_one_or_none(email=login_data.email)
     verify_hashpassword: bool = auth_service.verify_password(
         password=login_data.password, hashpassword=user.hashpassword
     ) if user else None
@@ -55,10 +50,8 @@ async def login(login_data: UserLoginSchema, responce: Response):
 
 
 @router.get("/me")
-async def about_me(user_id: UserIdDepen): # type: ignore
-    async with async_session_maker() as session:
-        user = await UserRepository(session=session).get_one_or_none(id=user_id)
-        await session.commit()
+async def about_me(user_id: UserIdDepen, db: DB_Dep): # type: ignore
+    user = await db.user.get_one_or_none(id=user_id)
     
     return user
 

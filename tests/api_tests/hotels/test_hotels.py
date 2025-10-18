@@ -1,8 +1,8 @@
 from httpx import Response
 
 
-async def test_get_hotels(create_client):
-    responce: Response = await create_client.get(
+async def test_get_hotels(async_client):
+    responce: Response = await async_client.get(
         url="/hotels",
         params={
             "date_from": "2025-10-10",
