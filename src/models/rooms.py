@@ -16,6 +16,6 @@ class Rooms(Base):
     facilities: Mapped[list["Facilities"]] = relationship(  # noqa: F821
         secondary="room_facilities", back_populates="rooms"
     )
-    
+
     def __repr__(self):
         return f"{self.__dict__}"

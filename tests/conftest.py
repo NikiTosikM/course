@@ -71,27 +71,26 @@ async def async_client() -> AsyncClient:
 
 @pytest.fixture(scope="session", autouse=True)
 async def register_user(async_client) -> dict:
-    user_data = UserRequestSchema(name="nikita", email="12345@mail.ru", password="1234567899")
+    user_data = UserRequestSchema(
+        name="nikita", email="12345@mail.ru", password="1234567899"
+    )
     await async_client.post(
         url="/auth/register",
         json=user_data.model_dump(),
     )
-    
+
     return user_data
 
 
 @pytest.fixture(scope="session")
-async def authorized_user(async_client,  register_user) -> AsyncClient:
+async def authorized_user(async_client, register_user) -> AsyncClient:
     responce: Response = await async_client.post(
         url="/auth/login",
-        json={"email": register_user.email, "password": register_user.password}
+        json={"email": register_user.email, "password": register_user.password},
     )
     access_token = async_client.cookies.get("access_token")
-    
+
     assert responce.status_code == 200
     assert access_token
-    
+
     yield async_client
-    
-    
-    

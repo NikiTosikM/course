@@ -50,5 +50,3 @@ async def get_db_manager():
 
 
 DB_Dep = Annotated[DBManager, Depends(get_db_manager)]
-
-

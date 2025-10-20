@@ -75,7 +75,7 @@ async def get_hotel(db_manager: DB_Dep, hotel_id: int):
     try:
         hotel = await db_manager.hotel.specific_object(hotel_id=hotel_id)
         await db_manager.commit()
-        
+
         return {"status": "ok", "hotel": hotel}
     except ObjectNotFoundError as e:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=e.detail)

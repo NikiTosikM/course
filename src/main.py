@@ -7,12 +7,11 @@ from pathlib import Path
 from src.api import main_router
 
 
-
 sys.path.append(str(Path(__file__).parent))
 
 app = FastAPI()
 
-        
+
 app.include_router(main_router)
 
 

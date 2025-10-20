@@ -14,5 +14,4 @@ async def test_create(async_client):
     )
 
     assert responce.status_code == 200
-    assert responce.json()["data"] 
-
+    assert responce.json()["data"]

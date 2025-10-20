@@ -20,7 +20,7 @@ class BookingRepository(BaseRepository):
         self,
         booking_data: RequestBookingSchema,
         room: ResponceRoomHotelSchema,
-        user_id: int
+        user_id: int,
     ):
         if not room:
             raise HTTPException(
@@ -39,5 +39,5 @@ class BookingRepository(BaseRepository):
         booking_schema = DBBookingSchema(
             user_id=user_id, price=total_cost_booking, **booking_data.model_dump()
         )
-        
-        return await self.add(data=booking_schema) 
+
+        return await self.add(data=booking_schema)

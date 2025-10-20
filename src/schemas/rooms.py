@@ -34,7 +34,6 @@ class ResponceRoomHotelSchema(BaseModelSchema):
     facilities: list[FacilityResponceSchema] = []
 
 
-
 class RequestRoomHotelPartialUpdateSchema(BaseModelSchema):
     title: str | None = None
     description: str | None = None

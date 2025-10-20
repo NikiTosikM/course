@@ -21,9 +21,7 @@ async def create_booking(
         date_to=booking_data.date_to,
     )
     booking: DBResponceBookingSchema = await db_manager.booking.add_booking(
-        booking_data=booking_data,
-        room=room,
-        user_id=user_id
+        booking_data=booking_data, room=room, user_id=user_id
     )
     await db_manager.commit()
 
@@ -31,16 +29,14 @@ async def create_booking(
 
 
 @router.get("/")
-async def get_all(
-    db_manager: DB_Dep
-):
+async def get_all(db_manager: DB_Dep):
     bookings: list[Booking] = await db_manager.booking.get_all()
-    
+
     return bookings
 
 
 @router.get("/me")
 async def get_specific(db_manager: DB_Dep, user_id: UserIdDepen):
     bookings: list[Booking] = await db_manager.booking.get_filtered(user_id=user_id)
-    
+
     return bookings

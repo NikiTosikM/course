@@ -5,7 +5,7 @@ from src.schemas import (
     DBResponceBookingSchema,
     RoomFacilityResponceSchema,
     HotelResponceSchema,
-    FacilityResponceSchema
+    FacilityResponceSchema,
 )
 
 
@@ -22,10 +22,12 @@ class BookingDataMapper(BaseDataMapper):
 class FacilityDataMapper(BaseDataMapper):
     model = Facilities
     schema = FacilityResponceSchema
-    
+
+
 class RoomFacilityDataMapper(BaseDataMapper):
     model = RoomFacilities
     schema = RoomFacilityResponceSchema
+
 
 class HotelDataMapper(BaseDataMapper):
     model = Hotels

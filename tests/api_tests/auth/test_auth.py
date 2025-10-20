@@ -1,5 +1,4 @@
-import asyncio
-from httpx import Response, AsyncClient, ASGITransport
+from httpx import Response
 import pytest
 
 from tests.parametrize_datas.auth import datas_for_full_check_user
