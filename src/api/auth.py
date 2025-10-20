@@ -7,11 +7,10 @@ from src.schemas.user import (
     UserLoginSchema,
 )
 from src.models.user import User
-from src.core.db.base_model import async_session_maker
-from src.repositories.user_repository import UserRepository
 from src.service.auth.auth_service import auth_service
 from src.api.dependencies import UserIdDepen, LogoutDepen
 from src.api.dependencies import DB_Dep
+from src.exceptions.exceptions import UserAlreadyCreatedError
 
 
 router = APIRouter(prefix="/auth", tags=["Authenticated and authorization"])
@@ -23,12 +22,18 @@ async def register(user_data: UserRequestSchema, db: DB_Dep):
     user_data_for_db = UserDBSchema(
         name=user_data.name, email=user_data.email, hashpassword=hash_password
     )
-    created_user: UserResponceSchema = await db.user.add_user(
-            data=user_data_for_db
-        )
-    await db.commit()
-
-    return created_user
+    try:
+        created_user: UserResponceSchema = await db.user.add_user(
+                data=user_data_for_db
+            )
+        await db.commit()
+        
+        return created_user
+    except UserAlreadyCreatedError:
+        raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="User with this email is already registered"
+            )
 
 
 @router.post("/login")

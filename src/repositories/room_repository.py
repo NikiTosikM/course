@@ -1,3 +1,4 @@
+from datetime import date
 from fastapi import HTTPException, status
 from sqlalchemy import Result, insert, select
 from sqlalchemy.orm import selectinload
@@ -8,6 +9,7 @@ from src.repositories.db_expressions import (
     get_info_available_rooms,
 )
 from src.schemas.rooms import ResponceRoomHotelSchema, RoomHotelSchema
+from src.exceptions.exceptions import DateFromLaterDateToError
 
 
 class RoomRepository(BaseRepository[Rooms]):
@@ -74,7 +76,9 @@ class RoomRepository(BaseRepository[Rooms]):
 
         return rooms
 
-    async def get_all_free_rooms(self, date_from: str, date_to: str, hotel_id: int):
+    async def get_all_free_rooms(self, date_from: date, date_to: date, hotel_id: int):
+        if date_from > date_to:
+            raise DateFromLaterDateToError
         return await self._get_available_rooms(date_from, date_to, hotel_id)
 
         # print("вот запрос", query.compile(bind=async_engine, compile_kwargs={"literal_binds": True}))

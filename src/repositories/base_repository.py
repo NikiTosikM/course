@@ -1,10 +1,13 @@
 from typing import Generic, TypeVar
 
-from fastapi import HTTPException, status
 from sqlalchemy import Result, delete, insert, select, update
+from sqlalchemy import Result
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.exc import NoResultFound
 
 from src.repositories.mappers.base_mapper import DBModel, Schema
+from src.exceptions.exceptions import ObjectNotFoundError
+
 
 ValidateDatas = TypeVar("ValidateDatas", DBModel, None, list[DBModel])
 
@@ -60,18 +63,23 @@ class BaseRepository(Generic[DBModel]):
         )
         await self.session.execute(stmt)
 
-
+    async def specific_object(self, object_id: int):
+        query = select(self.model).where(self.model.id==object_id)
+        result = await self.session.execute(query)
+        try:
+            model = result.scalar_one()   
+                 
+            return self.schema.model_validate(model)
+        except NoResultFound:
+            raise ObjectNotFoundError(f"Отель с id - {hotel_id} не найден")
+        
     async def delete(self, **filters) -> None:
+        try:
+            await self.specific_object()
         stmt = (
             delete(self.model)
             .filter_by(**filters)
             .returning(self.model)
         )
-        await self.session.execute(stmt)
+        self.session.execute(stmt)
 
-    async def specific_object(self, hotel_id: int):
-        query = select(self.model).where(self.model.id==hotel_id)
-        result = await self.session.execute(query)
-        model = result.scalar_one_or_none()
-        
-        return self.schema.model_validate(model)

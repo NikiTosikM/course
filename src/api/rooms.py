@@ -1,7 +1,7 @@
 from typing import Annotated
 from datetime import date
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, HTTPException, status
 
 from src.schemas.rooms import (
     RoomHotelSchema,
@@ -14,6 +14,7 @@ from src.schemas.rooms import (
 from src.schemas.facility import RoomFacilityAddSchema
 from src.models.rooms import Rooms
 from src.api.dependencies import DB_Dep
+from src.exceptions.exceptions import DateFromLaterDateToError, ObjectNotFoundError
 
 
 router = APIRouter(prefix="/hotels", tags=["Rooms"])
@@ -30,11 +31,15 @@ async def get_all_rooms(
         date, Query(description="Дата выезда из номера", examples=["2025-09-15"])
     ],
 ):
-    rooms: list[Rooms] = await db_manager.room.get_all_free_rooms(
-        date_from=data_from, date_to=data_to, hotel_id=hotel_id
-    )
+    try:
+        rooms: list[Rooms] = await db_manager.room.get_all_free_rooms(
+            date_from=data_from, date_to=data_to, hotel_id=hotel_id
+        )
 
-    return rooms
+        return rooms
+
+    except DateFromLaterDateToError as e:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=e.detail)
 
 
 @router.get("/{hotel_id}/rooms/{room_id}")
@@ -62,20 +67,25 @@ async def create_room(
     hotel_id: int,
     room: RoomHotelSchema,
 ):
-    room_data = RoomHotelAddSchema(**room.model_dump())
-    room_data: ResponceRoomHotelSchema = await db_manager.room.add(
-        data=room_data, hotel_id=hotel_id
-    )
+    try:
+        await db_manager.hotel.specific_object(hotel_id=hotel_id)
 
-    room_facilities = [
-        RoomFacilityAddSchema(room_id=room_data.id, facility_id=facil_id)
-        for facil_id in room.facilities_ids
-    ]
-    await db_manager.room_facility.add_bulk(room_facilities)
+        room_data = RoomHotelAddSchema(**room.model_dump())
+        room_data: ResponceRoomHotelSchema = await db_manager.room.add(
+            data=room_data, hotel_id=hotel_id
+        )
 
-    await db_manager.commit()
+        room_facilities = [
+            RoomFacilityAddSchema(room_id=room_data.id, facility_id=facil_id)
+            for facil_id in room.facilities_ids
+        ]
+        await db_manager.room_facility.add_bulk(room_facilities)
 
-    return room_data
+        await db_manager.commit()
+
+        return room_data
+    except ObjectNotFoundError as e:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=e.detail)
 
 
 @router.put("/{hotel_id}/rooms/{room_id}")
@@ -123,7 +133,10 @@ async def change_room(
 
 @router.delete("/{hotel_id}/rooms/{room_id}")
 async def delete_room(db_manager: DB_Dep, hotel_id: int, room_id: int):
-    await db_manager.room.delete(id=room_id, hotel_id=hotel_id)
-    await db_manager.commit()
+    try:
+        await db_manager.room.delete(id=room_id, hotel_id=hotel_id)
+        await db_manager.commit()
 
-    return {"status": "ok"}
+        return {"status": "ok"}
+    except ObjectNotFoundError as e:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=e.d)
