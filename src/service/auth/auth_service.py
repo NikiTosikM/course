@@ -2,10 +2,11 @@ from datetime import datetime, timezone, timedelta
 
 from passlib.context import CryptContext
 from src.core.config import settings
+from src.service.base_service import BaseService
 import jwt
 
 
-class AuthService:
+class AuthService(BaseService):
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
     def verify_password(self, password: str, hashpassword: str) -> bool:
@@ -30,6 +31,8 @@ class AuthService:
             token, key=settings.token.secret_key, algorithms=settings.token.algorithm
         )
         return decode_data
+    
+    
 
 
 auth_service = AuthService()

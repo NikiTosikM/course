@@ -1,7 +1,6 @@
 from typing import Generic, TypeVar
 
 from sqlalchemy import Result, delete, insert, select, update
-from sqlalchemy import Result
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import NoResultFound
 
@@ -71,11 +70,10 @@ class BaseRepository(Generic[DBModel]):
                  
             return self.schema.model_validate(model)
         except NoResultFound:
-            raise ObjectNotFoundError(f"Отель с id - {hotel_id} не найден")
+            raise ObjectNotFoundError()
         
     async def delete(self, **filters) -> None:
-        try:
-            await self.specific_object()
+        await self.specific_object()
         stmt = (
             delete(self.model)
             .filter_by(**filters)

@@ -19,7 +19,7 @@ engine_null_pool = create_async_engine(settings.db.get_db_url, poolclass=NullPoo
 async_session_maker = async_sessionmaker(engine_null_pool, expire_on_commit=False)
 
 
-@pytest.fixture(autouse=True, scope="session")
+@pytest.fixture(autouse=True, scope="")
 async def create_tables():
     assert settings.mode == "TEST"
 

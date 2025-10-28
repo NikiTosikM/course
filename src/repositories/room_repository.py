@@ -1,5 +1,4 @@
 from datetime import date
-from fastapi import HTTPException, status
 from sqlalchemy import Result, insert, select
 from sqlalchemy.orm import selectinload
 
@@ -9,7 +8,7 @@ from src.repositories.db_expressions import (
     get_info_available_rooms,
 )
 from src.schemas.rooms import ResponceRoomHotelSchema, RoomHotelSchema
-from src.exceptions.exceptions import DateFromLaterDateToError
+from src.exceptions.exceptions import DateFromLaterDateToError,  ObjectNotFoundError
 
 
 class RoomRepository(BaseRepository[Rooms]):
@@ -98,5 +97,6 @@ class RoomRepository(BaseRepository[Rooms]):
             room_id=room_id,
             **filter_by,
         )
-
-        return id_room[0] if id_room else None
+        if id_room:
+            return id_room[0]
+        raise ObjectNotFoundError

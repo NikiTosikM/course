@@ -1,11 +1,8 @@
-from datetime import date
-
 from fastapi import HTTPException, status
 
 from src.repositories.base_repository import BaseRepository
 from src.models.bookings import Booking
 from src.schemas.bookings import DBResponceBookingSchema
-from src.repositories.db_expressions import get_info_available_rooms
 from src.schemas import ResponceRoomHotelSchema, RequestBookingSchema, DBBookingSchema
 
 

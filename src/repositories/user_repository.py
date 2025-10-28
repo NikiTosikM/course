@@ -1,9 +1,11 @@
 from sqlalchemy import Result, select
+from sqlalchemy.exc import NoResultFound
 
-from src.repositories.base_repository import BaseRepository
+from src.repositories.base_repository import BaseRepository, DBModel
 from src.models.user import User
 from src.schemas.user import UserResponceSchema, UserDBSchema
-from src.exceptions.exceptions import UserAlreadyCreatedError
+from src.exceptions.exceptions import UserAlreadyCreatedError, UserNotFoundError
+
 
 
 class UserRepository(BaseRepository[User]):
@@ -20,3 +22,13 @@ class UserRepository(BaseRepository[User]):
             raise UserAlreadyCreatedError(email=data.email)
 
         return await self.add(data=data)
+    
+    async def get_user(self, **filter_by) ->  DBModel | None:
+        query = select(self.model).filter_by(**filter_by)
+        result: Result = await self.session.execute(query)
+
+        try:
+            return result.scalar_one
+        except NoResultFound:
+            raise UserNotFoundError
+
